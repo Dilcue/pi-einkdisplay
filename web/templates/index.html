@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="dashboard-grid">
+  <a href="/calendar" class="dash-card cal">
+    <div class="icon">📅</div>
+    <h3>Calendar</h3>
+    <div class="meta">
+      {{ cfg.calendar_ids | length }} source{{ 's' if cfg.calendar_ids | length != 1 else '' }} &middot;
+      {{ cfg.calendar_max_events }} event{{ 's' if cfg.calendar_max_events != 1 else '' }} &middot;
+      {% if oauth_connected %}
+        <span class="badge badge-green">OAuth ✓</span>
+      {% else %}
+        <span class="badge badge-red">Not authorized</span>
+      {% endif %}
+    </div>
+  </a>
+
+  <a href="/weather" class="dash-card weather">
+    <div class="icon">🌤</div>
+    <h3>Weather</h3>
+    <div class="meta">
+      {{ cfg.location_name }} &middot;
+      Refresh {{ cfg.data_refresh_minutes }} min
+    </div>
+  </a>
+
+  <a href="/display" class="dash-card display">
+    <div class="icon">🖥</div>
+    <h3>Display</h3>
+    <div class="meta">
+      {{ cfg.pages | length }} page{{ 's' if cfg.pages | length != 1 else '' }} &middot;
+      {{ cfg.page_delay_seconds }}s delay
+    </div>
+  </a>
+
+  <a href="/system" class="dash-card system">
+    <div class="icon">⚙️</div>
+    <h3>System</h3>
+    <div class="meta">
+      einkdisplay &middot;
+      {% if status == 'active' %}
+        <span class="badge badge-green">running</span>
+      {% else %}
+        <span class="badge badge-red">{{ status }}</span>
+      {% endif %}
+      &middot; up {{ uptime }}
+    </div>
+  </a>
+</div>
+{% endblock %}
