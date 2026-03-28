@@ -16,8 +16,6 @@
     <h2>Active Pages</h2>
     <p style="font-size:13px;color:#666;margin-bottom:14px;">Drag to reorder. Uncheck to hide.</p>
     <ul class="page-list" id="pageList">
-      {% set ordered = cfg.pages %}
-      {% set all_in_order = ordered + [p for p in all_pages if p not in ordered] %}
       {% for page_id in all_in_order %}
         <li class="page-item" draggable="true" data-id="{{ page_id }}">
           <span class="drag-handle">⠿</span>
