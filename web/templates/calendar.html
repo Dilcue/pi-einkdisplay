@@ -24,6 +24,7 @@
 </div>
 
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="card">
     <h2>Calendar Sources</h2>
     {% if all_calendars %}
@@ -47,7 +48,7 @@
     <div class="form-group">
       <label for="max_events">Number of upcoming events on the display</label>
       <select name="calendar_max_events" id="max_events" style="max-width:120px;">
-        {% for n in range(1, 8) %}
+        {% for n in range(1, 6) %}
           <option value="{{ n }}" {% if n == cfg.calendar_max_events %}selected{% endif %}>{{ n }}</option>
         {% endfor %}
       </select>

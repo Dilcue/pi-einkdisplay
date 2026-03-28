@@ -3,6 +3,7 @@
 <h1>Display</h1>
 
 <form method="post" id="displayForm">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="card">
     <h2>Page Delay</h2>
     <div class="form-group">
