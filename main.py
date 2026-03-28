@@ -15,12 +15,14 @@ from pages.calendar_page import CalendarPage
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 _log = logging.getLogger(__name__)
 
-pages = [
-    ClockPage(),
-    WeatherCurrentPage(),
-    WeatherForecastPage(),
-    CalendarPage(),
-]
+_PAGE_REGISTRY = {
+    "clock": ClockPage,
+    "weather_current": WeatherCurrentPage,
+    "weather_forecast": WeatherForecastPage,
+    "calendar": CalendarPage,
+}
+
+pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
 
 _refresh_interval = settings.data_refresh_minutes * 60
 

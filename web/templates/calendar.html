@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Calendar</h1>
+
+<div class="card">
+  <h2>OAuth Authorization</h2>
+  <div class="oauth-box">
+    {% if oauth_email %}
+      <div style="font-size:20px;">✅</div>
+      <div class="status">
+        <strong>Connected</strong>
+        Google Calendar access is authorized.
+      </div>
+      <a href="/oauth/start" class="btn btn-secondary" style="white-space:nowrap;">Re-authorize</a>
+    {% else %}
+      <div style="font-size:20px;">🔑</div>
+      <div class="status">
+        <strong>Not authorized</strong>
+        Connect a Google account to fetch calendar events.
+      </div>
+      <a href="/oauth/start" class="btn btn-primary" style="white-space:nowrap;">Authorize</a>
+    {% endif %}
+  </div>
+</div>
+
+<form method="post">
+  <div class="card">
+    <h2>Calendar Sources</h2>
+    {% if all_calendars %}
+      <ul class="checkbox-list">
+        {% for cal in all_calendars %}
+          <li>
+            <input type="checkbox" name="calendar_ids" value="{{ cal.id }}"
+              id="cal_{{ loop.index }}"
+              {% if cal.id in cfg.calendar_ids %}checked{% endif %}>
+            <label for="cal_{{ loop.index }}" style="margin:0;font-weight:400;cursor:pointer;">{{ cal.name }}</label>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="color:#666;font-size:14px;">No calendars found. Authorize a Google account above first.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Events to Show</h2>
+    <div class="form-group">
+      <label for="max_events">Number of upcoming events on the display</label>
+      <select name="calendar_max_events" id="max_events" style="max-width:120px;">
+        {% for n in range(1, 8) %}
+          <option value="{{ n }}" {% if n == cfg.calendar_max_events %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save &amp; Restart Display</button>
+</form>
+{% endblock %}

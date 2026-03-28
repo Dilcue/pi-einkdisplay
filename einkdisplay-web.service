@@ -1,0 +1,13 @@
+[Unit]
+Description=E-Ink Display Web UI
+After=network.target
+
+[Service]
+User=chris
+WorkingDirectory=/home/chris/einkdisplay
+ExecStart=/home/chris/einkdisplay-venv/bin/python web/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

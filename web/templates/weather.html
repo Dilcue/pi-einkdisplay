@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Weather</h1>
+
+<form method="post">
+  <div class="card">
+    <h2>Location</h2>
+    <div class="form-group">
+      <label for="location_name">Display name</label>
+      <input type="text" id="location_name" name="location_name" value="{{ cfg.location_name }}">
+    </div>
+    <div class="form-group">
+      <label for="latitude">Latitude</label>
+      <input type="text" id="latitude" name="latitude" value="{{ cfg.latitude }}" class="narrow">
+    </div>
+    <div class="form-group">
+      <label for="longitude">Longitude</label>
+      <input type="text" id="longitude" name="longitude" value="{{ cfg.longitude }}" class="narrow">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>API</h2>
+    <div class="form-group">
+      <label for="owm_api_key">OpenWeatherMap API key</label>
+      <input type="text" id="owm_api_key" name="owm_api_key" value="{{ masked_key }}"
+        placeholder="Leave blank to keep existing key">
+    </div>
+    <div class="form-group">
+      <label for="data_refresh_minutes">Refresh interval</label>
+      <select name="data_refresh_minutes" id="data_refresh_minutes" style="max-width:150px;">
+        {% for m in [15, 30, 60, 120] %}
+          <option value="{{ m }}" {% if m == cfg.data_refresh_minutes %}selected{% endif %}>{{ m }} minutes</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save &amp; Restart Display</button>
+</form>
+{% endblock %}
