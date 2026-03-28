@@ -18,7 +18,7 @@ def _draw_row(draw: ImageDraw, top: int, label: str, forecast: DayForecast) -> N
     draw.text((0, top + 4), forecast.icon, font=_WEATHER_FONT, fill=_BLACK)
     draw.text((30, top + 0), label, font=_FONT, fill=_BLACK)
     draw.text((30, top + 8), forecast.temp, font=_HEADER_FONT, fill=_BLACK)
-    draw.text((80, top + 16), forecast.cond, font=_FONT, fill=_BLACK)
+    draw.text((86, top + 16), forecast.cond, font=_FONT, fill=_BLACK)
 
 
 class WeatherForecastPage(Page):
