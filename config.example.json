@@ -3,6 +3,9 @@
     "latitude": "0.000000",
     "longitude": "0.000000",
     "calendar_display_name": "Your Calendar Name",
+    "calendar_ids": [],
+    "calendar_max_events": 3,
     "page_delay_seconds": 7,
-    "data_refresh_minutes": 60
+    "data_refresh_minutes": 60,
+    "pages": ["clock", "weather_current", "weather_forecast", "calendar"]
 }

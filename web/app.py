@@ -1,11 +1,13 @@
 import base64
 import json
+import logging
 import os
 import secrets
 import subprocess
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+_log = logging.getLogger(__name__)
 
 import dateutil.parser
 from flask import Flask, flash, redirect, render_template, request, url_for
@@ -92,7 +94,9 @@ def _restart_display() -> None:
         capture_output=True, text=True
     )
     if result.returncode != 0:
-        raise RuntimeError("systemctl restart failed")
+        detail = result.stderr.strip() or "no details"
+        _log.error("systemctl restart failed: %s", detail)
+        raise RuntimeError("Display restart failed")
 
 
 def _service_status() -> str:
@@ -230,7 +234,9 @@ def oauth_start():
         str(_CREDENTIALS_PATH), scopes=_SCOPES,
         redirect_uri=url_for("oauth_callback", _external=True)
     )
-    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    auth_url, state = flow.authorization_url(prompt="consent", access_type="offline")
+    from flask import session
+    session["oauth_state"] = state
     return redirect(auth_url)
 
 
@@ -239,6 +245,11 @@ def oauth_callback():
     error = request.args.get("error")
     if error:
         flash(f"Google authorization denied: {error}", "danger")
+        return redirect(url_for("calendar"))
+    from flask import session
+    expected_state = session.pop("oauth_state", None)
+    if not expected_state or request.args.get("state") != expected_state:
+        flash("Authorization failed: invalid state. Please try again.", "danger")
         return redirect(url_for("calendar"))
     try:
         flow = Flow.from_client_secrets_file(
@@ -249,6 +260,7 @@ def oauth_callback():
         _TOKEN_PATH.write_text(flow.credentials.to_json())
         flash("Google account authorized successfully.", "success")
     except Exception:
+        _log.exception("OAuth callback failed")
         flash("Authorization failed. Please try again.", "danger")
     return redirect(url_for("calendar"))
 
@@ -283,7 +295,7 @@ def weather():
 
 
 @app.route("/display", methods=["GET", "POST"])
-def display():
+def display_settings():
     cfg = _load_config()
 
     if request.method == "POST":
@@ -303,7 +315,7 @@ def display():
             flash("Display settings saved. Display restarting…", "success")
         except RuntimeError:
             flash("Settings saved but display restart failed.", "warning")
-        return redirect(url_for("display"))
+        return redirect(url_for("display_settings"))
 
     ordered = cfg.get("pages", _ALL_PAGES)
     all_in_order = ordered + [p for p in _ALL_PAGES if p not in ordered]

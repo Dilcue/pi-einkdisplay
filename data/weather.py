@@ -48,7 +48,9 @@ def fetch() -> WeatherReport:
     forecast = forecast_resp.json()
 
     sunset_ts = current["sys"]["sunset"]
-    is_day = int(time.time()) <= sunset_ts
+    sunrise_ts = current["sys"]["sunrise"]
+    now_ts = int(time.time())
+    is_day = sunrise_ts <= now_ts <= sunset_ts
 
     current_icon_code = current["weather"][0]["icon"]
 

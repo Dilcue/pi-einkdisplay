@@ -22,10 +22,6 @@ _PAGE_REGISTRY = {
     "calendar": CalendarPage,
 }
 
-pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
-
-_refresh_interval = settings.data_refresh_minutes * 60
-
 
 def _refresh_weather(app_data: AppData) -> None:
     try:
@@ -44,6 +40,19 @@ def _refresh_calendar(app_data: AppData) -> None:
 
 
 def main() -> None:
+    # Build page list inside main() so font-loading crashes are caught by the
+    # logging setup above and produce useful error messages rather than raw tracebacks.
+    try:
+        pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
+        if not pages:
+            _log.error("No valid pages configured — check 'pages' in config.json")
+            return
+    except Exception as e:
+        _log.error("Failed to initialize pages: %s", e)
+        return
+
+    refresh_interval = settings.data_refresh_minutes * 60
+
     display.init()
     buttons.init()
 
@@ -56,7 +65,7 @@ def main() -> None:
 
     while True:
         now = time.time()
-        if now - last_refresh >= _refresh_interval:
+        if now - last_refresh >= refresh_interval:
             _refresh_weather(app_data)
             _refresh_calendar(app_data)
             last_refresh = now
