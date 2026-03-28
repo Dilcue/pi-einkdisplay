@@ -19,6 +19,13 @@ def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
     return image, draw
 
 
+def clear() -> None:
+    """Write a full white frame to clear ghosting between page cycles."""
+    white = Image.new("RGBA", _SIZE, (255, 255, 255, 255))
+    with open(_FB_PATH, "wb") as fb:
+        fb.write(white.tobytes())
+
+
 def update(image: Image.Image) -> None:
     # Convert 1-bit image to 32-bit RGBA that the repaper DRM framebuffer expects.
     # Invert before converting so black text on white renders correctly on the panel.

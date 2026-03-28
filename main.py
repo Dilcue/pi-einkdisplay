@@ -1,6 +1,7 @@
 import logging
 import time
 
+import buttons
 import display
 from config import settings
 from data import weather
@@ -34,6 +35,7 @@ def _refresh_weather(app_data: AppData) -> None:
 
 def main() -> None:
     display.init()
+    buttons.init()
 
     app_data = AppData()
     _refresh_weather(app_data)
@@ -52,8 +54,11 @@ def main() -> None:
         page.render(draw, app_data)
         display.update(image)
 
-        time.sleep(settings.page_delay_seconds + page.time_bonus)
+        buttons.wait_or_advance(settings.page_delay_seconds + page.time_bonus)
         page_index = (page_index + 1) % len(pages)
+
+        if page_index == 0:
+            display.clear()
 
 
 if __name__ == "__main__":
