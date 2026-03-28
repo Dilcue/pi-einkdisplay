@@ -143,6 +143,11 @@ The deploy workflow (rsync from Mac → Pi, systemd service for boot/restart) ne
 - `deploy.sh` stub will be created but process is not finalized
 - `systemd` service setup to be documented in a future spec
 
+### Forecast Page Display Cleanup
+The 3-day forecast page has two styling issues to address when implementing `pages/weather_forecast.py`:
+- The floating `(Fri)` / `(Sat)` day labels at `x=172` are disconnected and redundant — remove them and fold the day name inline with the row label (e.g., "Today (Fri)")
+- Condition + description text truncates at the right edge — show only `cond` (e.g., "Rain") without the verbose `desc` restatement
+
 ### Gemini Home Automation Integration
 Google Gemini home automation as a future data source / interactive page. Unrefined — revisit when the platform matures and requirements are clearer.
 
