@@ -32,8 +32,6 @@ class WeatherForecastPage(Page):
 
         _draw_row(draw, top, f"Today ({w.today.day})", w.today)
         top += _ROW_HEIGHT
-        draw.line([(0, top), (200, top)], fill=_BLACK)
         _draw_row(draw, top, f"Tomorrow ({w.tomorrow.day})", w.tomorrow)
         top += _ROW_HEIGHT
-        draw.line([(0, top), (200, top)], fill=_BLACK)
         _draw_row(draw, top, w.day3.day, w.day3)
