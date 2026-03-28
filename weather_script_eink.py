@@ -50,8 +50,6 @@ BIG_WEATHER_FONT = ImageFont.truetype('./CD-IconsPC.ttf', 48)
 
 # Secrets
 OPEN_WEATHER_MAP_API_KEY = ""
-GARAGE_USER_ID = ""
-GARAGE_PASSWORD = ""
 
 #######################
 # Display Switch Setup
@@ -74,7 +72,6 @@ DISP.update()
 ########################
 counter = 0
 page = 0
-garageStatus = ""
 calendarEvents = None
 weatherReport = None
 
@@ -302,14 +299,12 @@ def getGoogleCalendarData():
 ################
 # Main function
 ################
-# Check arugments
-if(len(sys.argv[1:]) != 3):
-    print("Arguments are required!  In order provide: Weather API Key, Garage User ID, Garage Password")
+# Check arguments
+if(len(sys.argv[1:]) != 1):
+    print("Arguments are required!  In order provide: Weather API Key")
     exit()
 else:
     OPEN_WEATHER_MAP_API_KEY = sys.argv[1]
-    GARAGE_USER_ID = sys.argv[2]
-    GARAGE_PASSWORD = sys.argv[3]
 
 # Loop de loop
 while True:
@@ -418,51 +413,7 @@ while True:
 
         TOP = PADDING
         page += 1
-    elif page == 3:
-        # Display Garage Door Status (continued below if Open)
-        draw.text((0, TOP + 2), "Garage Status", font=HEADER_FONT, fill=BLACK)
-        draw.line([(0, TOP + 16), (180, TOP + 16)], fill=BLACK)
-
-        garageBaseUrl = "http://192.168.1.11/api/"
-        garageStatusUrl = garageBaseUrl + "status"
-        garageCloseUrl = garageBaseUrl + "close"
-
-        garageUser = GARAGE_USER_ID
-        garagePass = GARAGE_PASSWORD
-
-        garageResp = None
-
-        try:
-            garageResp = requests.get(
-                garageStatusUrl, auth=(garageUser, garagePass))
-        except:
-            print("Garage call failed")
-
-        garageStatus = None
-
-        if(garageResp and garageResp.status_code == 200):
-            garBody = garageResp.json()
-            garageStatus = garBody["response"]
-
-        if(garageStatus == "Closed"):
-            draw.text((0, TOP + 23), "Ô", font=WEATHER_FONT, fill=BLACK)
-            draw.text((32, TOP + 34), "CLOSED", font=HUGE_FONT, fill=BLACK)
-            page = 4
-        elif(garageStatus == "Open"):
-            draw.text((0, TOP + 23), "Ó", font=WEATHER_FONT, fill=BLACK)
-            draw.text((32, TOP + 34), "OPEN", font=HUGE_FONT, fill=BLACK)
-            draw.text((32, TOP + 80), "Close the garage, click here...",
-                      font=FONT, fill=BLACK)
-            draw.line([(32, TOP + 70), (195, TOP + 70)], fill=BLACK)
-            draw.line([(195, TOP + 70), (195, TOP + 25)], fill=BLACK)
-            draw.text((185, TOP - 9), "u", font=WEATHER_FONT, fill=BLACK)
-        else:
-            draw.text((0, TOP + 23), "ï", font=WEATHER_FONT, fill=BLACK)
-            draw.text((32, TOP + 34), "UNKNOWN", font=HUGE_FONT, fill=BLACK)
-            draw.text((32, TOP + 80), "Check garage status manually...",
-                      font=FONT, fill=BLACK)
-            page = 4
-    elif(page == 4):
+    elif(page == 3):
         # Google Calendar Events
         draw.text((0, TOP + 2), "Family Calendar",
                   font=HEADER_FONT, fill=BLACK)
@@ -528,62 +479,6 @@ while True:
     # else :
     # DISP.partial_update()
     # DISP.show()
-    if(page == 3 and garageStatus == "Open"):
-        page = 4
-
-        pageDelayInMs = PAGE_DELAY * 1000
-        customWait = 0
-        shouldCloseGarage = False
-        print("GPIO = " + str(GPIO.input(SW1)))
-        while(customWait < pageDelayInMs):
-            if(GPIO.input(SW1) == False):
-                shouldCloseGarage = True
-                break
-            else:
-                print(str(customWait))
-                customWait += 1
-
-        print("Should close garage = " + str(shouldCloseGarage))
-        if(shouldCloseGarage == True):
-            # Draw a black filled box to clear the image.
-            image = Image.new('1', DISP.size, WHITE)
-            draw = ImageDraw.Draw(image)
-            draw.text((0, TOP + 2), "Garage Status",
-                      font=HEADER_FONT, fill=BLACK)
-            draw.line([(0, TOP + 16), (180, TOP + 16)], fill=BLACK)
-            draw.text((0, TOP + 23), "Ô", font=WEATHER_FONT, fill=BLACK)
-            draw.text((32, TOP + 34), "Closing...", font=HUGE_FONT, fill=BLACK)
-
-            DISP.display(image)
-            DISP.partial_update()
-
-            garageResp = requests.get(
-                garageCloseUrl, auth=(garageUser, garagePass))
-
-            image = Image.new('1', DISP.size, WHITE)
-            draw = ImageDraw.Draw(image)
-
-            if(garageResp.status_code == 200):
-                draw.text((0, TOP + 2), "Garage Status",
-                          font=HEADER_FONT, fill=BLACK)
-                draw.line([(0, TOP + 16), (180, TOP + 16)], fill=BLACK)
-                draw.text((0, TOP + 23), "Ô", font=WEATHER_FONT, fill=BLACK)
-                draw.text((32, TOP + 34), "CLOSED", font=HUGE_FONT, fill=BLACK)
-            else:
-                draw.text((0, TOP + 2), "Garage Status",
-                          font=HEADER_FONT, fill=BLACK)
-                draw.line([(0, TOP + 16), (180, TOP + 16)], fill=BLACK)
-                draw.text((0, TOP + 23), "ï", font=WEATHER_FONT, fill=BLACK)
-                draw.text((32, TOP + 34), "UNKNOWN",
-                          font=HUGE_FONT, fill=BLACK)
-                draw.text(
-                    (32, TOP + 80), "Check garage status manually...", font=FONT, fill=BLACK)
-
-            DISP.display(image)
-            DISP.partial_update()
-            time.sleep(PAGE_DELAY)
-
-    else:
-        time.sleep(PAGE_DELAY + timeDelayBonus)
+    time.sleep(PAGE_DELAY + timeDelayBonus)
 
     counter += 1
