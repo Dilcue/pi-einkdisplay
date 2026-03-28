@@ -7,10 +7,10 @@ from pages.base import AppData, Page
 
 _FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 8)
 _HEADER_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 12)
-_WEATHER_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 32)
+_WEATHER_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 24)
 
 _BLACK = 0
-_ROW_HEIGHT = 33
+_ROW_HEIGHT = 32
 
 
 def _draw_row(draw: ImageDraw, top: int, label: str, forecast: DayForecast) -> None:
@@ -28,7 +28,7 @@ class WeatherForecastPage(Page):
             return
 
         w = data.weather
-        top = -2
+        top = 0
 
         _draw_row(draw, top, f"Today ({w.today.day})", w.today)
         top += _ROW_HEIGHT
