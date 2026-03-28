@@ -21,6 +21,7 @@
   </div>
 
   <form method="post" action="/system/restart">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" class="btn btn-danger">Restart Display</button>
   </form>
 </div>

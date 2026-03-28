@@ -3,6 +3,7 @@
 <h1>Weather</h1>
 
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="card">
     <h2>Location</h2>
     <div class="form-group">
@@ -23,8 +24,10 @@
     <h2>API</h2>
     <div class="form-group">
       <label for="owm_api_key">OpenWeatherMap API key</label>
-      <input type="text" id="owm_api_key" name="owm_api_key" value="{{ masked_key }}"
-        placeholder="Leave blank to keep existing key">
+      <input type="password" id="owm_api_key" name="owm_api_key" value=""
+        placeholder="{{ '••••••••' if has_api_key else 'Enter API key' }}"
+        autocomplete="new-password">
+      {% if has_api_key %}<p style="font-size:12px;color:#666;margin-top:4px;">Key is set. Enter a new value to replace it.</p>{% endif %}
     </div>
     <div class="form-group">
       <label for="data_refresh_minutes">Refresh interval</label>
