@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from PIL.ImageDraw import ImageDraw
 
 from data.weather import WeatherReport
-from data.calendar_client import CalendarEvent
+
+if TYPE_CHECKING:
+    from data.calendar_client import CalendarEvent
 
 
 @dataclass

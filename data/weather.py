@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 import requests
 
@@ -25,7 +25,6 @@ class WeatherReport:
     current_desc: str
     current_wind_speed: str
     current_wind_dir: str
-    current_uv_index: str
     current_visibility: str
     current_sunrise: str
     current_sunset: str
@@ -56,7 +55,7 @@ def fetch() -> WeatherReport:
     # Group 3-hour forecast periods by local date
     days: dict[date, list] = defaultdict(list)
     for entry in forecast["list"]:
-        local_dt = local_time(datetime.utcfromtimestamp(entry["dt"]))
+        local_dt = local_time(datetime.fromtimestamp(entry["dt"], tz=timezone.utc))
         days[local_dt.date()].append(entry)
 
     sorted_days = sorted(days.keys())
@@ -66,7 +65,7 @@ def fetch() -> WeatherReport:
         high = max(p["main"]["temp_max"] for p in periods)
         low = min(p["main"]["temp_min"] for p in periods)
         # Use the midday period for condition/icon, fall back to first
-        midday = next((p for p in periods if 11 <= local_time(datetime.utcfromtimestamp(p["dt"])).hour <= 14), periods[0])
+        midday = next((p for p in periods if 11 <= local_time(datetime.fromtimestamp(p["dt"], tz=timezone.utc)).hour <= 14), periods[0])
         icon_code = midday["weather"][0]["icon"]
         return DayForecast(
             day=d.strftime("%a"),
@@ -75,7 +74,7 @@ def fetch() -> WeatherReport:
             icon=resolve_weather_icon(icon_code, force_day),
         )
 
-    today_date = local_time(datetime.utcnow()).date()
+    today_date = local_time(datetime.now(tz=timezone.utc)).date()
     future_days = [d for d in sorted_days if d >= today_date]
 
     return WeatherReport(
@@ -85,10 +84,9 @@ def fetch() -> WeatherReport:
         current_desc=current["weather"][0]["description"],
         current_wind_speed=f"{'%.0f' % current['wind']['speed']}",
         current_wind_dir=wind_deg_to_dir(current["wind"]["deg"]),
-        current_uv_index="N/A",
         current_visibility=str(current.get("visibility", "N/A")),
-        current_sunrise=local_time(datetime.utcfromtimestamp(current["sys"]["sunrise"])).strftime("%I:%M %p"),
-        current_sunset=local_time(datetime.utcfromtimestamp(sunset_ts)).strftime("%I:%M %p"),
+        current_sunrise=local_time(datetime.fromtimestamp(current["sys"]["sunrise"], tz=timezone.utc)).strftime("%I:%M %p"),
+        current_sunset=local_time(datetime.fromtimestamp(sunset_ts, tz=timezone.utc)).strftime("%I:%M %p"),
         current_feels_like=f"{'%.0f' % current['main']['feels_like']}",
         current_icon=resolve_weather_icon(current_icon_code, is_day),
         today=_day(future_days[0], force_day=is_day) if len(future_days) > 0 else DayForecast("---", "--/--", "---", ""),
