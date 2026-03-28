@@ -65,6 +65,13 @@ def _format_event(event: dict) -> CalendarEvent:
     return CalendarEvent(summary=summary, time_display=time_display)
 
 
+_CALENDAR_IDS = [
+    "your-email@example.com",
+    "your-family@example.com",
+    "your-calendar-id@group.calendar.google.com",
+]
+
+
 def fetch() -> list[CalendarEvent]:
     creds = _load_creds()
     if creds is None:
@@ -72,12 +79,21 @@ def fetch() -> list[CalendarEvent]:
 
     service = build("calendar", "v3", credentials=creds)
     now = datetime.now(tz=timezone.utc).isoformat()
-    result = service.events().list(
-        calendarId="primary",
-        timeMin=now,
-        maxResults=3,
-        singleEvents=True,
-        orderBy="startTime",
-    ).execute()
 
-    return [_format_event(e) for e in result.get("items", [])]
+    events = []
+    for cal_id in _CALENDAR_IDS:
+        result = service.events().list(
+            calendarId=cal_id,
+            timeMin=now,
+            maxResults=10,
+            singleEvents=True,
+            orderBy="startTime",
+        ).execute()
+        events.extend(result.get("items", []))
+
+    # Sort all events by start time and return the next 3
+    def _start_key(e: dict) -> str:
+        return e["start"].get("dateTime") or e["start"].get("date") or ""
+
+    events.sort(key=_start_key)
+    return [_format_event(e) for e in events[:3]]
