@@ -8,7 +8,7 @@ Instructions for an AI agent to replicate this build on a Raspberry Pi 4 (or oth
 
 ## Prerequisites (confirm before starting)
 
-- Pi is running Raspberry Pi OS (Bookworm or later, 32-bit or 64-bit)
+- Pi is running Raspberry Pi OS (Bookworm or Trixie, 32-bit or 64-bit)
 - SSH is accessible and key auth is configured
 - You have the OpenWeatherMap API key
 - The project repo is cloned locally at a known path
@@ -33,13 +33,13 @@ ssh einkdisplay 'echo "dtoverlay=papirus,panel=e2200cs021" | sudo tee -a /boot/f
 ssh einkdisplay 'sudo reboot'
 ```
 
-Wait for the Pi to come back up (Pi 4 reboots in ~15–20 seconds), then verify:
+Wait for the Pi to come back up (~15–20 seconds), then verify the framebuffer device exists:
 
 ```bash
-ssh einkdisplay 'ls /dev/epd && echo "epd ready"'
+ssh einkdisplay 'ls /dev/fb* && dmesg | grep repaper'
 ```
 
-Expected: `/dev/epd` directory exists. If not, check `dmesg | grep -i papirus` for errors.
+Expected: `/dev/fb0` (or `fb1`) and a `Initialized repaper` line in dmesg. The display uses the kernel's DRM repaper driver — there is no `/dev/epd` on kernel 6.x.
 
 **Panel sizes:** Replace `e2200cs021` with the correct value for your screen:
 - 1.44" → `e1144cs021`
@@ -48,35 +48,43 @@ Expected: `/dev/epd` directory exists. If not, check `dmesg | grep -i papirus` f
 
 ---
 
-## Step 3 — Install system packages
+## Step 3 — Hide the terminal cursor
+
+Prevents the bash cursor from bleeding onto the e-ink display:
 
 ```bash
-ssh einkdisplay 'sudo apt install -y python3-pil python3-smbus i2c-tools python3-pip'
+ssh einkdisplay 'sudo sed -i "s/$/ vt.global_cursor_default=0 logo.nologo/" /boot/firmware/cmdline.txt'
 ```
 
 ---
 
-## Step 4 — Set up a Python virtual environment
+## Step 4 — Install system packages
 
-On Pi 4 with Bookworm or later, system Python is externally managed. Use a venv:
+```bash
+ssh einkdisplay 'sudo apt update -qq && sudo apt install -y python3-pil python3-smbus i2c-tools python3-pip'
+```
+
+---
+
+## Step 5 — Set up a Python virtual environment
 
 ```bash
 ssh einkdisplay 'python3 -m venv /home/<user>/einkdisplay-venv'
-ssh einkdisplay '/home/<user>/einkdisplay-venv/bin/pip install papirus requests python-dotenv python-dateutil google-api-python-client google-auth-oauthlib'
+ssh einkdisplay '/home/<user>/einkdisplay-venv/bin/pip install pillow requests python-dotenv python-dateutil google-api-python-client google-auth-oauthlib'
 ```
 
 Verify:
 
 ```bash
-ssh einkdisplay '/home/<user>/einkdisplay-venv/bin/python -c "import papirus, PIL, requests, dotenv, dateutil, googleapiclient; print(\"OK\")"'
+ssh einkdisplay '/home/<user>/einkdisplay-venv/bin/python -c "import PIL, requests, dotenv, dateutil, googleapiclient; print(\"OK\")"'
 ```
 
-> **Pi Zero W / older OS:** If venv is unavailable, fall back to:
-> `pip3 install --break-system-packages <packages>`
+> **Pi Zero W / older OS:** If venv is unavailable, use:
+> `pip3 install --break-system-packages pillow requests python-dotenv python-dateutil google-api-python-client google-auth-oauthlib`
 
 ---
 
-## Step 5 — Create project directory and deploy files
+## Step 6 — Deploy project files
 
 ```bash
 ssh einkdisplay 'mkdir -p /home/<user>/einkdisplay'
@@ -92,7 +100,7 @@ rsync -avz \
 
 ---
 
-## Step 6 — Write the .env secrets file
+## Step 7 — Write the .env secrets file
 
 ```bash
 ssh einkdisplay 'echo "OPEN_WEATHER_MAP_API_KEY=<key>" > /home/<user>/einkdisplay/.env && chmod 600 /home/<user>/einkdisplay/.env'
@@ -100,17 +108,51 @@ ssh einkdisplay 'echo "OPEN_WEATHER_MAP_API_KEY=<key>" > /home/<user>/einkdispla
 
 ---
 
-## Step 7 — Run and verify
+## Step 8 — Set up systemd service
 
 ```bash
-ssh einkdisplay 'cd /home/<user>/einkdisplay && /home/<user>/einkdisplay-venv/bin/python -u main.py 2>&1'
+ssh einkdisplay 'cat > /tmp/einkdisplay.service << '"'"'EOF'"'"'
+[Unit]
+Description=E-Ink Display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=<user>
+WorkingDirectory=/home/<user>/einkdisplay
+ExecStart=/home/<user>/einkdisplay-venv/bin/python -u main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo cp /tmp/einkdisplay.service /etc/systemd/system/einkdisplay.service && sudo systemctl daemon-reload && sudo systemctl enable einkdisplay && sudo systemctl start einkdisplay'
 ```
 
-Expected: logging output showing weather fetch success, display updating every 7 seconds, e-ink screen cycling through clock, current weather, and forecast pages.
+Verify it started:
+
+```bash
+ssh einkdisplay 'sudo systemctl status einkdisplay --no-pager'
+```
 
 ---
 
-## Step 8 — Google Calendar (optional, requires browser on first run)
+## Step 9 — Reboot and verify
+
+```bash
+ssh einkdisplay 'sudo reboot'
+# Wait ~20 seconds, then:
+ssh einkdisplay 'sudo systemctl status einkdisplay --no-pager'
+```
+
+Expected: `Active: active (running)` and a weather fetch log line. Display should be cycling through pages with no cursor visible.
+
+---
+
+## Step 10 — Google Calendar (optional, requires browser on first run)
 
 Calendar is disabled by default in `main.py`. To enable:
 
@@ -125,6 +167,10 @@ Calendar is disabled by default in `main.py`. To enable:
    - `from pages.calendar_page import CalendarPage`
    - `CalendarPage()` in the pages list
    - `_refresh_calendar(app_data)` calls in `main()`
+5. Restart the service:
+   ```bash
+   ssh einkdisplay 'sudo systemctl restart einkdisplay'
+   ```
 
 ---
 
@@ -132,12 +178,14 @@ Calendar is disabled by default in `main.py`. To enable:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `/dev/epd` missing | Overlay not loaded | Verify `dtoverlay=papirus,panel=<size>` in `/boot/firmware/config.txt`, reboot |
+| No `/dev/fb0` after reboot | Overlay not loaded | Verify `dtoverlay=papirus,panel=<size>` in `/boot/firmware/config.txt`, reboot |
 | `OSError: cannot open resource` | Fonts not deployed | Ensure `fonts/` was included in rsync |
-| `ModuleNotFoundError: papirus` | venv not activated or install failed | Re-run Step 4 with correct venv path |
-| `externally-managed-environment` pip error | Bookworm+ system Python protection | Use the venv approach in Step 4 |
-| Weather fetch fails | Bad API key or OWM endpoint | Verify `.env` key; OWM `onecall` requires a paid plan as of API v3 |
+| `ModuleNotFoundError` | venv not activated or install failed | Re-run Step 5 with correct venv path |
+| `externally-managed-environment` pip error | Bookworm+ system Python protection | Use the venv approach in Step 5 |
+| Weather fetch 401 error | OWM onecall requires paid plan | The app uses `/data/2.5/weather` and `/data/2.5/forecast` (free tier) — verify API key |
+| Cursor visible on display | cmdline.txt not updated | Re-run Step 3 and reboot |
 | Calendar token refresh fails | Expired or missing refresh token | Re-run OAuth flow from a browser machine, copy new `token.json` |
+| Service not starting | Check logs | `sudo journalctl -u einkdisplay -n 50` |
 
 ---
 
