@@ -1,4 +1,6 @@
+import logging
 import threading
+import datetime
 import gpiod
 from gpiod.line import Bias, Edge
 
@@ -6,24 +8,31 @@ _PINS = [21, 16, 20, 19, 26]  # SW1–SW5
 _CHIP = "/dev/gpiochip0"
 _advance = threading.Event()
 _thread = None
+_log = logging.getLogger(__name__)
 
 
 def _watch():
-    request = gpiod.request_lines(
-        _CHIP,
-        consumer="einkdisplay-buttons",
-        config={
-            tuple(_PINS): gpiod.LineSettings(
-                edge_detection=Edge.FALLING,
-                bias=Bias.PULL_UP,
-                debounce_period=__import__("datetime").timedelta(milliseconds=300),
-            )
-        },
-    )
-    while True:
-        if request.wait_edge_events(timeout=__import__("datetime").timedelta(seconds=1)):
-            request.read_edge_events()
-            _advance.set()
+    try:
+        request = gpiod.request_lines(
+            _CHIP,
+            consumer="einkdisplay-buttons",
+            config={
+                tuple(_PINS): gpiod.LineSettings(
+                    edge_detection=Edge.FALLING,
+                    bias=Bias.PULL_UP,
+                    debounce_period=datetime.timedelta(milliseconds=300),
+                )
+            },
+        )
+        _log.info("Button watcher started on pins %s", _PINS)
+        while True:
+            if request.wait_edge_events(timeout=datetime.timedelta(seconds=1)):
+                events = request.read_edge_events()
+                for e in events:
+                    _log.info("Button pressed on pin %s", e.line_offset)
+                _advance.set()
+    except Exception as e:
+        _log.error("Button watcher failed: %s", e)
 
 
 def init() -> None:
