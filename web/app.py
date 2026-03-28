@@ -247,8 +247,13 @@ def display():
             flash(f"Settings saved but restart failed: {e}", "warning")
         return redirect(url_for("display"))
 
+    # Build display order: configured pages first, then any unconfigured ones appended
+    ordered = cfg.get("pages", all_pages)
+    all_in_order = ordered + [p for p in all_pages if p not in ordered]
+
     return render_template("display.html",
-        cfg=cfg, all_pages=all_pages, page_labels=page_labels
+        cfg=cfg, all_pages=all_pages, page_labels=page_labels,
+        all_in_order=all_in_order,
     )
 
 
