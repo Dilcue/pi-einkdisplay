@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 import dateutil.parser
 from google.auth.transport.requests import Request
@@ -71,7 +71,7 @@ def fetch() -> list[CalendarEvent]:
         raise RuntimeError("No valid Google credentials available")
 
     service = build("calendar", "v3", credentials=creds)
-    now = datetime.utcnow().isoformat() + "Z"
+    now = datetime.now(tz=timezone.utc).isoformat()
     result = service.events().list(
         calendarId="primary",
         timeMin=now,

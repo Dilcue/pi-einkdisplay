@@ -34,7 +34,6 @@ class WeatherCurrentPage(Page):
         draw.text((90, _TOP + 34), f"Feels Like {w.current_feels_like}", font=_FONT, fill=_BLACK)
 
         draw.text((45, _TOP + 50), f"Wind Speed: {w.current_wind_speed}mph {w.current_wind_dir}", font=_FONT, fill=_BLACK)
-        draw.text((45, _TOP + 60), f"UV Index: {w.current_uv_index}", font=_FONT, fill=_BLACK)
-        draw.text((45, _TOP + 70), f"Visibility: {w.current_visibility}", font=_FONT, fill=_BLACK)
-        draw.text((45, _TOP + 80), f"Sunrise: {w.current_sunrise}", font=_FONT, fill=_BLACK)
-        draw.text((45, _TOP + 90), f"Sunset: {w.current_sunset}", font=_FONT, fill=_BLACK)
+        draw.text((45, _TOP + 60), f"Visibility: {w.current_visibility}", font=_FONT, fill=_BLACK)
+        draw.text((45, _TOP + 70), f"Sunrise: {w.current_sunrise}", font=_FONT, fill=_BLACK)
+        draw.text((45, _TOP + 80), f"Sunset: {w.current_sunset}", font=_FONT, fill=_BLACK)

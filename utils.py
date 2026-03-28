@@ -2,7 +2,9 @@ from datetime import timezone, datetime
 
 
 def local_time(utc_dt: datetime) -> datetime:
-    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    return utc_dt.astimezone(tz=None)
 
 
 def wind_deg_to_dir(wind_deg: float) -> str:
