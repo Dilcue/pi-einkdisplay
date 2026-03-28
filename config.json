@@ -1,0 +1,8 @@
+{
+    "location_name": "Your City, ST",
+    "latitude": "YOUR_LATITUDE",
+    "longitude": "YOUR_LONGITUDE",
+    "calendar_display_name": "Family Calendar",
+    "page_delay_seconds": 7,
+    "data_refresh_minutes": 60
+}
