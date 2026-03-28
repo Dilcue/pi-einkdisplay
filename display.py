@@ -19,18 +19,19 @@ def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
     return image, draw
 
 
+def _encode(image: Image.Image) -> bytes:
+    """Convert a 1-bit image to the RGBA encoding the repaper DRM framebuffer expects."""
+    from PIL import ImageOps
+    return ImageOps.invert(image.convert("L")).convert("RGBA").tobytes()
+
+
 def clear() -> None:
     """Write a full white frame to clear ghosting between page cycles."""
-    white = Image.new("RGBA", _SIZE, (255, 255, 255, 255))
+    white = Image.new("1", _SIZE, 1)  # 1 = white, same as new_image()
     with open(_FB_PATH, "wb") as fb:
-        fb.write(white.tobytes())
+        fb.write(_encode(white))
 
 
 def update(image: Image.Image) -> None:
-    # Convert 1-bit image to 32-bit RGBA that the repaper DRM framebuffer expects.
-    # Invert before converting so black text on white renders correctly on the panel.
-    from PIL import ImageOps
-    rgba = ImageOps.invert(image.convert("L")).convert("RGBA")
-    raw = rgba.tobytes()
     with open(_FB_PATH, "wb") as fb:
-        fb.write(raw)
+        fb.write(_encode(image))

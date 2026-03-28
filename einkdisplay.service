@@ -1,0 +1,16 @@
+[Unit]
+Description=E-Ink Display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=chris
+WorkingDirectory=/home/chris/einkdisplay
+ExecStart=/home/chris/einkdisplay-venv/bin/python -u main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
