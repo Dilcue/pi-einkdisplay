@@ -1,5 +1,5 @@
 import struct
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 _FB_PATH = "/dev/fb0"
 _WIDTH = 200
@@ -40,3 +40,20 @@ def clear() -> None:
 def update(image: Image.Image) -> None:
     with open(_FB_PATH, "wb") as fb:
         fb.write(_encode(image))
+
+
+def splash() -> None:
+    """Show a startup splash screen (white text on black) for 2 seconds."""
+    import pathlib
+    import time
+    font_path = pathlib.Path(__file__).parent / "fonts" / "nokiafc22.ttf"
+    font = ImageFont.truetype(str(font_path), 8)
+
+    image = Image.new("1", _SIZE, 0)  # black background
+    draw = ImageDraw.Draw(image)
+    text = "Loading Display..."
+    w = draw.textlength(text, font=font)
+    draw.text((4, 4), text, font=font, fill=1)  # white text, upper left
+    with open(_FB_PATH, "wb") as fb:
+        fb.write(_encode(image))
+    time.sleep(2)

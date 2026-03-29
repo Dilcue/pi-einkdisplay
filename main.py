@@ -56,6 +56,8 @@ def main() -> None:
     display.init()
     buttons.init()
 
+    display.splash()
+
     app_data = AppData()
     _refresh_weather(app_data)
     _refresh_calendar(app_data)
@@ -78,10 +80,10 @@ def main() -> None:
         buttons.wait_or_advance(settings.page_delay_seconds + page.time_bonus)
         page_index = (page_index + 1) % len(pages)
 
-        if page_index == 0:
-            _log.info("Clearing display before page 0")
+        if page_index % 2 == 0:
+            _log.info("Clearing display before page %d", page_index)
             display.clear()
-            time.sleep(2)  # let the panel finish the clear cycle before next write
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
