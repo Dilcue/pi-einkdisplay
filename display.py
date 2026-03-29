@@ -26,10 +26,15 @@ def _encode(image: Image.Image) -> bytes:
 
 
 def clear() -> None:
-    """Write a full white frame to clear ghosting between page cycles."""
-    white = Image.new("1", _SIZE, 1)  # 1 = white, same as new_image()
+    """Trigger a global refresh by writing a full-black frame.
+
+    The repaper driver fires its global waveform (black flash → white flash)
+    when it receives an all-black frame, which eliminates ghosting. The
+    subsequent page render provides the white-to-content transition.
+    """
+    black = Image.new("1", _SIZE, 0)  # 0 = black
     with open(_FB_PATH, "wb") as fb:
-        fb.write(_encode(white))
+        fb.write(_encode(black))
 
 
 def update(image: Image.Image) -> None:
