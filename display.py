@@ -54,4 +54,4 @@ def splash() -> None:
     draw.text((4, 4), text, font=font, fill=1)  # white text, upper left
     with open(_FB_PATH, "wb") as fb:
         fb.write(_encode(image))
-    time.sleep(2)
+    time.sleep(1)
