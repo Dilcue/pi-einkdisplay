@@ -79,7 +79,9 @@ def main() -> None:
         page_index = (page_index + 1) % len(pages)
 
         if page_index == 0:
+            _log.info("Clearing display before page 0")
             display.clear()
+            time.sleep(2)  # let the panel finish the clear cycle before next write
 
 
 if __name__ == "__main__":
