@@ -1,4 +1,3 @@
-import struct
 from PIL import Image, ImageDraw, ImageFont
 
 _FB_PATH = "/dev/fb0"
@@ -52,7 +51,6 @@ def splash() -> None:
     image = Image.new("1", _SIZE, 0)  # black background
     draw = ImageDraw.Draw(image)
     text = "Loading Display..."
-    w = draw.textlength(text, font=font)
     draw.text((4, 4), text, font=font, fill=1)  # white text, upper left
     with open(_FB_PATH, "wb") as fb:
         fb.write(_encode(image))

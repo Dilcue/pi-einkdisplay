@@ -1,12 +1,12 @@
 # Pi E-Ink Display
 
-Raspberry Pi Zero W weather and calendar display using a PaPiRus 2.0" e-ink HAT.
+Raspberry Pi weather and calendar display using a PaPiRus 2.0" e-ink HAT. Includes a Flask web UI for configuration accessible from any browser on the local network.
 
 ---
 
 ## Hardware
 
-- Raspberry Pi Zero W
+- Raspberry Pi 4 (or Zero W)
 - PaPiRus 2.0" e-ink HAT (`e2200cs021`)
 
 ---
@@ -55,8 +55,9 @@ sudo apt install -y python3-pil python3-smbus i2c-tools python3-pip
 
 ```bash
 pip3 install --break-system-packages \
-  papirus requests python-dotenv python-dateutil \
-  google-api-python-client google-auth-oauthlib
+  requests python-dotenv python-dateutil \
+  google-api-python-client google-auth-oauthlib \
+  flask flask-wtf gpiod
 ```
 
 ---
@@ -65,6 +66,7 @@ pip3 install --break-system-packages \
 
 ```bash
 rsync -avz --exclude='.git' --exclude='__pycache__' --exclude='.env' \
+  --exclude='config.json' --exclude='credentials.json' --exclude='token.json' \
   /path/to/pi-einkdisplay/ <user>@<pi-ip>:/home/<user>/einkdisplay/
 ```
 
@@ -72,15 +74,23 @@ rsync -avz --exclude='.git' --exclude='__pycache__' --exclude='.env' \
 
 ## Configuration
 
-**`config.json`** — app preferences (committed):
+Copy the example config and fill in your settings:
+```bash
+cp config.example.json config.json
+```
+
+**`config.json`** — app preferences (not committed, see `config.example.json`):
 ```json
 {
-    "location_name": "Your City, State",
-    "latitude": "0.000000",
-    "longitude": "0.000000",
+    "location_name": "Your City, ST",
+    "latitude": "YOUR_LATITUDE",
+    "longitude": "YOUR_LONGITUDE",
     "calendar_display_name": "Your Calendar Name",
+    "calendar_ids": [],
+    "calendar_max_events": 3,
     "page_delay_seconds": 7,
-    "data_refresh_minutes": 60
+    "data_refresh_minutes": 60,
+    "pages": ["clock", "weather_current", "weather_forecast", "calendar"]
 }
 ```
 
@@ -92,16 +102,50 @@ chmod 600 /home/<user>/einkdisplay/.env
 
 ---
 
-## Google Calendar (optional)
+## Display Service (systemd)
 
-1. Obtain `credentials.json` from Google Cloud Console (Calendar API, OAuth2 desktop app)
-2. Run the OAuth flow from a machine with a browser to generate `token.json`
-3. Copy both files to `/home/<user>/einkdisplay/`
-4. Re-enable calendar in `main.py` by uncommenting the calendar imports, page registration, and refresh call
+```bash
+sudo cp einkdisplay.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable einkdisplay
+sudo systemctl start einkdisplay
+```
 
 ---
 
-## Running
+## Web UI (systemd)
+
+The web UI runs on port 8080 and lets you configure weather, calendar, display pages, and OAuth from any browser on your local network.
+
+**Sudoers entry** (required for the web UI to restart the display service):
+```bash
+sudo visudo
+# Add this line:
+<user> ALL=(ALL) NOPASSWD: /bin/systemctl restart einkdisplay
+```
+
+**Service setup:**
+```bash
+sudo cp einkdisplay-web.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable einkdisplay-web
+sudo systemctl start einkdisplay-web
+```
+
+Access at: `http://<pi-ip>:8080`
+
+---
+
+## Google Calendar (optional)
+
+1. Obtain `credentials.json` from Google Cloud Console (Calendar API, OAuth2 web app)
+2. Copy to `/home/<user>/einkdisplay/credentials.json`
+3. Open the web UI → Calendar → Authorize with Google to generate `token.json`
+4. Select which calendars to display
+
+---
+
+## Running Without systemd
 
 ```bash
 cd /home/<user>/einkdisplay
