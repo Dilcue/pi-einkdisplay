@@ -10,7 +10,7 @@ from pathlib import Path
 _log = logging.getLogger(__name__)
 
 import dateutil.parser
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_wtf.csrf import CSRFProtect
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
@@ -235,7 +235,6 @@ def oauth_start():
         redirect_uri=url_for("oauth_callback", _external=True)
     )
     auth_url, state = flow.authorization_url(prompt="consent", access_type="offline")
-    from flask import session
     session["oauth_state"] = state
     return redirect(auth_url)
 
@@ -246,7 +245,6 @@ def oauth_callback():
     if error:
         flash(f"Google authorization denied: {error}", "danger")
         return redirect(url_for("calendar"))
-    from flask import session
     expected_state = session.pop("oauth_state", None)
     if not expected_state or request.args.get("state") != expected_state:
         flash("Authorization failed: invalid state. Please try again.", "danger")
@@ -271,11 +269,21 @@ def weather():
     env = _load_env()
 
     if request.method == "POST":
-        cfg["location_name"] = request.form.get("location_name", "").strip()
-        cfg["latitude"] = request.form.get("latitude", "").strip()
-        cfg["longitude"] = request.form.get("longitude", "").strip()
+        lat_str = request.form.get("latitude", "").strip()
+        lon_str = request.form.get("longitude", "").strip()
         try:
-            cfg["data_refresh_minutes"] = int(request.form.get("data_refresh_minutes", 60))
+            lat = float(lat_str)
+            lon = float(lon_str)
+            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                raise ValueError("out of range")
+        except ValueError:
+            flash("Invalid latitude or longitude. Latitude must be −90..90, longitude −180..180.", "danger")
+            return redirect(url_for("weather"))
+        cfg["location_name"] = request.form.get("location_name", "").strip()
+        cfg["latitude"] = lat_str
+        cfg["longitude"] = lon_str
+        try:
+            cfg["data_refresh_minutes"] = max(5, int(request.form.get("data_refresh_minutes", 60)))
         except ValueError:
             cfg["data_refresh_minutes"] = 60
         api_key = request.form.get("owm_api_key", "").strip()

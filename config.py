@@ -7,8 +7,13 @@ load_dotenv()
 
 _BASE = Path(__file__).parent
 
-with open(_BASE / "config.json") as f:
-    _cfg = json.load(f)
+try:
+    with open(_BASE / "config.json") as f:
+        _cfg = json.load(f)
+except FileNotFoundError:
+    raise RuntimeError(
+        "config.json not found. Copy config.example.json to config.json and fill in your settings."
+    )
 
 
 class Settings:

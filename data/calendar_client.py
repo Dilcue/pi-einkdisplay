@@ -57,7 +57,7 @@ def _format_event(event: dict) -> CalendarEvent:
         time_display = start.strftime("%a %b %d") + " (All Day)"
     elif start == end:
         time_display = start.strftime("%a %b %d, %I:%M %p")
-    elif start.strftime("%A%B%Y") == end.strftime("%A%B%Y"):
+    elif start.date() == end.date():
         time_display = start.strftime("%a %b %d, %I:%M") + "-" + end.strftime("%I:%M %p")
     else:
         time_display = start.strftime("%a %b %d, %I:%M") + "-" + end.strftime("%a %b %d, %I:%M %p")
@@ -78,7 +78,7 @@ def fetch() -> list[CalendarEvent]:
         result = service.events().list(
             calendarId=cal_id,
             timeMin=now,
-            maxResults=10,
+            maxResults=settings.calendar_max_events,
             singleEvents=True,
             orderBy="startTime",
         ).execute()
