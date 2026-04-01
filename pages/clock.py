@@ -25,6 +25,6 @@ class ClockPage(Page):
         # nokiafc22 is a bitmap font where character widths are not uniform, so
         # draw.textlength() is also unreliable. These divisors are tuned per font size
         # and will need re-tuning if font sizes change.
-        draw.text((((128 - len(current_time)) / 4), _TOP + 15), current_time, font=_HUGE_FONT, fill=_BLACK)
+        draw.text((((128 - len(current_time)) / 4) + 6, _TOP + 15), current_time, font=_HUGE_FONT, fill=_BLACK)
         draw.text((((128 - len(current_day)) / 2), _TOP + 60), current_day, font=_HEADER_FONT, fill=_BLACK)
         draw.text((((128 - len(current_date)) / 2.75), _TOP + 75), current_date, font=_HEADER_FONT, fill=_BLACK)
