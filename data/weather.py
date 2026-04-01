@@ -80,15 +80,15 @@ def fetch() -> WeatherReport:
     future_days = [d for d in sorted_days if d >= today_date]
 
     return WeatherReport(
-        last_update=datetime.now().strftime("%I:%M"),
+        last_update=datetime.now().strftime("%-I:%M"),
         current_temp=f"{'%.0f' % current['main']['temp']}",
         current_cond=current["weather"][0]["main"].capitalize(),
         current_desc=current["weather"][0]["description"],
         current_wind_speed=f"{'%.0f' % current['wind']['speed']}",
         current_wind_dir=wind_deg_to_dir(current["wind"]["deg"]),
         current_visibility=str(current.get("visibility", "N/A")),
-        current_sunrise=local_time(datetime.fromtimestamp(current["sys"]["sunrise"], tz=timezone.utc)).strftime("%I:%M %p"),
-        current_sunset=local_time(datetime.fromtimestamp(sunset_ts, tz=timezone.utc)).strftime("%I:%M %p"),
+        current_sunrise=local_time(datetime.fromtimestamp(current["sys"]["sunrise"], tz=timezone.utc)).strftime("%-I:%M %p"),
+        current_sunset=local_time(datetime.fromtimestamp(sunset_ts, tz=timezone.utc)).strftime("%-I:%M %p"),
         current_feels_like=f"{'%.0f' % current['main']['feels_like']}",
         current_icon=resolve_weather_icon(current_icon_code, is_day),
         today=_day(future_days[0], force_day=is_day) if len(future_days) > 0 else DayForecast("---", "--/--", "---", ""),
