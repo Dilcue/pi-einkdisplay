@@ -56,11 +56,11 @@ def _format_event(event: dict) -> CalendarEvent:
     if all_day:
         time_display = start.strftime("%a %b %d") + " (All Day)"
     elif start == end:
-        time_display = start.strftime("%a %b %d, %I:%M %p")
+        time_display = start.strftime("%a %b %d, %-I:%M %p")
     elif start.date() == end.date():
-        time_display = start.strftime("%a %b %d, %I:%M") + "-" + end.strftime("%I:%M %p")
+        time_display = start.strftime("%a %b %d, %-I:%M") + "-" + end.strftime("%-I:%M %p")
     else:
-        time_display = start.strftime("%a %b %d, %I:%M") + "-" + end.strftime("%a %b %d, %I:%M %p")
+        time_display = start.strftime("%a %b %d, %-I:%M") + "-" + end.strftime("%a %b %d, %-I:%M %p")
 
     return CalendarEvent(summary=summary, time_display=time_display)
 
