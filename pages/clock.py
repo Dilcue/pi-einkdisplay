@@ -19,7 +19,7 @@ class ClockPage(Page):
         now = datetime.now()
         current_day = now.strftime("%A")
         current_date = now.strftime("%B, %d %Y")
-        current_time = now.strftime("%I:%M %p")
+        current_time = now.strftime("%-I:%M %p")
 
         # X positions use len(str) * empirical divisor rather than pixel metrics.
         # nokiafc22 is a bitmap font where character widths are not uniform, so
