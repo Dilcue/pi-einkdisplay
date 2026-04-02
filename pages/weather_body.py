@@ -5,10 +5,11 @@ from config import settings
 from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, DISPLAY_W, draw_page_dots
 
 _SECTION_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
-_GLYPH_BIG_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 120)
+_GLYPH_BIG_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 150)
 _LABEL_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 14)
 _VALUE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
-_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
+_TEMP_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 80)
+_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 26)
 _STRIP_DAY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _STRIP_GLYPH_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 52)
 _STRIP_TEMP_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 20)
@@ -16,9 +17,10 @@ _STRIP_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"),
 
 _PAD_X = 24
 _PAD_Y = 20
-# Horizontal center for the glyph+detail block.
-# Glyph ~150px wide, detail col offset 170px, detail text ~110px → block ~280px total.
-_BLOCK_X = (DISPLAY_W - 280) // 2  # 260
+# Three-column layout: temp | glyph | details
+_COL1_X = 24          # temp column left edge
+_COL2_X = 275         # glyph column left edge (150px glyph centered ~350)
+_COL3_X = 510         # details column left edge
 _STRIP_H = 120
 _STRIP_TOP = BODY_TOP + (480 - BODY_TOP - _STRIP_H)  # 360
 _DISPLAY_H = 480
@@ -39,8 +41,8 @@ def _draw_forecast_strip(draw: ImageDraw.ImageDraw, w) -> None:
 
         # Day name
         draw.text((x + 6, _STRIP_TOP + 4), label, font=_STRIP_DAY_FONT, fill=BLACK)
-        # Condition glyph
-        draw.text((x + col_w // 2 - 24, _STRIP_TOP + 26), day.icon, font=_STRIP_GLYPH_FONT, fill=BLACK)
+        # Condition glyph — centered horizontally, centered vertically between day name and temp row
+        draw.text((x + col_w // 2, _STRIP_TOP + 28), day.icon, font=_STRIP_GLYPH_FONT, fill=BLACK, anchor="mt")
         # High/low (red)
         draw.text((x + 4, _STRIP_TOP + 82), f"{day.temp}°", font=_STRIP_TEMP_FONT, fill=RED)
         # Condition text
@@ -62,31 +64,35 @@ class WeatherBodyPage(Page):
         label_y = BODY_TOP + _PAD_Y
         draw.text((_PAD_X, label_y), "WEATHER", font=_SECTION_FONT, fill=RED)
 
-        # Glyph is ~120px tall. Center it vertically in the content area.
-        # Conditions go below the glyph, constrained to left column (clear of detail at x=430).
+        # Vertically center content in body above the strip
         content_top = label_y + 34
         content_bottom = _STRIP_TOP - 42
-        block_h = 120  # glyph height
-        block_top = content_top + (content_bottom - content_top - block_h) // 2
-        glyph_y = block_top
-        draw.text((_BLOCK_X, glyph_y), w.current_icon, font=_GLYPH_BIG_FONT, fill=BLACK)
+        content_mid = (content_top + content_bottom) // 2
 
-        detail_x = _BLOCK_X + 170
-        detail_y = block_top + 10
-        row_gap = 48
+        # Col 1: current temp, right-aligned to col boundary, vertically centered
+        draw.text((_COL2_X - 10, content_mid - 45), f"{w.current_temp}°", font=_TEMP_FONT, fill=RED, anchor="rt")
+
+        # Col 2: glyph, horizontally and vertically centered in its column
+        glyph_col_mid = (_COL2_X + _COL3_X) // 2
+        glyph_y = content_mid - 75
+        draw.text((glyph_col_mid, glyph_y), w.current_icon, font=_GLYPH_BIG_FONT, fill=BLACK, anchor="mt")
+
+        # Col 3: Wind / Sunrise / Sunset, vertically centered as a block
+        row_gap = 38
+        block_h = 3 * row_gap
+        detail_y = content_mid - block_h // 2
         for label, value in [
             ("Wind", f"{w.current_wind_speed} mph {w.current_wind_dir}"),
             ("Sunrise", w.current_sunrise),
             ("Sunset", w.current_sunset),
         ]:
-            draw.text((detail_x, detail_y), label, font=_LABEL_FONT, fill=BLACK)
-            draw.text((detail_x, detail_y + 18), value, font=_VALUE_FONT, fill=BLACK)
+            draw.text((_COL3_X, detail_y), label, font=_LABEL_FONT, fill=BLACK)
+            draw.text((_COL3_X, detail_y + 16), value, font=_VALUE_FONT, fill=BLACK)
             detail_y += row_gap
 
-        # Conditions below glyph, left-aligned — stays within ~130px, clear of detail column
-        cond_y = glyph_y + block_h + 4
-        draw.text((_BLOCK_X, cond_y), w.current_desc.capitalize(), font=_COND_FONT, fill=BLACK)
-        draw.text((_BLOCK_X, cond_y + 20), f"Feels Like {w.current_feels_like}°F", font=_COND_FONT, fill=BLACK)
+        # Conditions centered on page just above the forecast strip
+        cond_str = f"{w.current_desc.capitalize()}, feels like {w.current_feels_like}°F"
+        draw.text((DISPLAY_W // 2, _STRIP_TOP - 34), cond_str, font=_COND_FONT, fill=BLACK, anchor="mt")
 
         _draw_forecast_strip(draw, w)
         draw_page_dots(draw, active_index=self.body_page_index, total=data.total_body_pages,
