@@ -30,11 +30,12 @@ _SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
-_ALL_PAGES = ["clock", "weather", "calendar"]
+_ALL_PAGES = ["clock", "weather", "calendar", "cats"]
 _PAGE_LABELS = {
     "clock": "Clock",
     "weather": "Weather",
     "calendar": "Calendar",
+    "cats": "Cats",
 }
 
 
@@ -348,6 +349,27 @@ def system_restart():
     except RuntimeError:
         flash("Restart failed. Check system logs.", "danger")
     return redirect(url_for("system"))
+
+
+@app.route("/cats", methods=["GET", "POST"])
+def cats_settings():
+    cfg = _load_config()
+
+    if request.method == "POST":
+        cfg["cats_enabled"] = request.form.get("cats_enabled") == "1"
+        try:
+            cfg["cat_cache_size"] = max(1, min(20, int(request.form.get("cat_cache_size", 8))))
+        except ValueError:
+            cfg["cat_cache_size"] = 8
+        _save_config(cfg)
+        try:
+            _restart_display()
+            flash("Cats settings saved. Display restarting…", "success")
+        except RuntimeError:
+            flash("Settings saved but display restart failed.", "warning")
+        return redirect(url_for("cats_settings"))
+
+    return render_template("cats.html", cfg=cfg)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from PIL import ImageDraw, ImageFont
@@ -10,6 +10,7 @@ from PIL import ImageDraw, ImageFont
 if TYPE_CHECKING:
     from data.weather import WeatherReport
     from data.calendar_client import CalendarEvent
+    from data.cats import CatFrame
 
 def load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
     """Load a TrueType font, falling back to the PIL default on failure."""
@@ -58,6 +59,8 @@ def draw_page_dots(draw: ImageDraw.ImageDraw, active_index: int, total: int, bot
 class AppData:
     weather: WeatherReport | None = None
     calendar_events: list[CalendarEvent] | None = None
+    cats: list[CatFrame] = field(default_factory=list)
+    cat_index: int = 0
     body_page_index: int = 0
     total_body_pages: int = 3
 

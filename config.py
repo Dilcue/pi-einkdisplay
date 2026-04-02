@@ -31,6 +31,9 @@ class Settings:
         # Optional at startup — weather fetch will fail gracefully if absent
         self.owm_api_key: str = os.environ.get("OPEN_WEATHER_MAP_API_KEY", "")
 
+        self.cats_enabled: bool = _cfg.get("cats_enabled", False)
+        self.cat_cache_size: int = _cfg.get("cat_cache_size", 8)
+
         self.credentials_path: str = str(_BASE / "credentials.json")
         self.token_path: str = str(_BASE / "token.json")
         self.fonts_dir: Path = _BASE / "fonts"
