@@ -5,11 +5,19 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from PIL import ImageDraw
+from PIL import ImageDraw, ImageFont
 
 if TYPE_CHECKING:
     from data.weather import WeatherReport
     from data.calendar_client import CalendarEvent
+
+def load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
+    """Load a TrueType font, falling back to the PIL default on failure."""
+    try:
+        return ImageFont.truetype(path, size)
+    except OSError:
+        return ImageFont.load_default()
+
 
 # Color palette (RGB tuples for PIL RGB images)
 BLACK = (0, 0, 0)

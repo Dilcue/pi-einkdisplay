@@ -5,11 +5,11 @@ from datetime import datetime
 from PIL import ImageFont, ImageDraw
 
 from config import settings
-from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, draw_page_dots
+from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, draw_page_dots, load_font
 
-_DAY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
-_TIME_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 72)
-_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
+_DAY_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
+_TIME_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 72)
+_DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
 
 _PAD_X = 24
 _PAD_Y = 16
@@ -80,8 +80,6 @@ def _draw_analog_clock(draw: ImageDraw.ImageDraw, now: datetime) -> None:
 
 
 class ClockPage(Page):
-    body_page_index = 2
-
     def render(self, draw: ImageDraw.ImageDraw, data: AppData) -> None:
         now = datetime.now()
         _draw_analog_clock(draw, now)
@@ -94,4 +92,4 @@ class ClockPage(Page):
         draw.text((_DIG_X, _DIG_Y + 40), time_str, font=_TIME_FONT, fill=BLACK)
         draw.text((_DIG_X, _DIG_Y + 120), date_str, font=_DATE_FONT, fill=BLACK)
 
-        draw_page_dots(draw, active_index=self.body_page_index, total=data.total_body_pages)
+        draw_page_dots(draw, active_index=data.body_page_index, total=data.total_body_pages)

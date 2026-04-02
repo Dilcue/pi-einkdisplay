@@ -2,13 +2,13 @@
 from PIL import ImageFont, ImageDraw
 
 from config import settings
-from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, draw_page_dots
+from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, draw_page_dots, load_font
 
-_SECTION_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
-_TIME_TODAY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
-_TIME_FUTURE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
-_TITLE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
-_EMPTY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
+_SECTION_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
+_TIME_TODAY_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
+_TIME_FUTURE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
+_TITLE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
+_EMPTY_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
 
 _PAD_X = 24
 _PAD_Y = 14
@@ -19,8 +19,6 @@ _TODAY_PREFIXES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 
 class CalendarPage(Page):
-    body_page_index = 0
-
     def render(self, draw: ImageDraw.ImageDraw, data: AppData) -> None:
         # Label pinned to top
         label_y = BODY_TOP + _PAD_Y
@@ -32,7 +30,7 @@ class CalendarPage(Page):
 
         if not events:
             draw.text((_PAD_X, label_y + 80), "No upcoming events!", font=_EMPTY_FONT, fill=BLACK)
-            draw_page_dots(draw, active_index=self.body_page_index, total=data.total_body_pages)
+            draw_page_dots(draw, active_index=data.body_page_index, total=data.total_body_pages)
             return
 
         # Evenly distribute events in the area below the label
@@ -50,4 +48,4 @@ class CalendarPage(Page):
             draw.text((_PAD_X, y), event.time_display, font=time_font, fill=BLACK)
             draw.text((title_x, y), event.summary, font=_TITLE_FONT, fill=BLACK)
 
-        draw_page_dots(draw, active_index=self.body_page_index, total=data.total_body_pages)
+        draw_page_dots(draw, active_index=data.body_page_index, total=data.total_body_pages)
