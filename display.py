@@ -1,57 +1,77 @@
+# display.py
+import os
+import pathlib
 from PIL import Image, ImageDraw, ImageFont
 
-_FB_PATH = "/dev/fb0"
-_WIDTH = 200
-_HEIGHT = 96
+_WIDTH = 800
+_HEIGHT = 480
 _SIZE = (_WIDTH, _HEIGHT)
+_PREVIEW_PATH = "/tmp/einkdisplay_preview.png"
+_FONTS_DIR = pathlib.Path(__file__).parent / "fonts"
+
+# Attempt to import the Adafruit hardware driver.
+# Falls back to simulator if the library is absent (dev Mac) or EINK_SIMULATE=1.
+_HW_AVAILABLE = False
+try:
+    import board
+    import busio
+    import digitalio
+    from adafruit_epd.uc8179 import Adafruit_UC8179
+    _HW_AVAILABLE = True
+except ImportError:
+    pass
+
+_display = None  # set by init()
+
+
+def _simulator_mode() -> bool:
+    return os.environ.get("EINK_SIMULATE", "0") == "1" or not _HW_AVAILABLE
 
 
 def init() -> None:
-    # Verify framebuffer is accessible
-    with open(_FB_PATH, "wb"):
-        pass
+    global _display
+    if _simulator_mode():
+        return
+    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    ecs = digitalio.DigitalInOut(board.CE0)
+    dc = digitalio.DigitalInOut(board.D22)
+    rst = digitalio.DigitalInOut(board.D27)
+    busy = digitalio.DigitalInOut(board.D17)
+    _display = Adafruit_UC8179(
+        800, 480, spi,
+        cs_pin=ecs, dc_pin=dc, sramcs_pin=None,
+        rst_pin=rst, busy_pin=busy,
+        tri_color=True,
+    )
+    _display.rotation = 1
 
 
 def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
-    image = Image.new("1", _SIZE, 1)  # 1 = white
+    image = Image.new("RGB", _SIZE, (255, 255, 255))  # white background
     draw = ImageDraw.Draw(image)
     return image, draw
 
 
-def _encode(image: Image.Image) -> bytes:
-    """Convert a 1-bit image to the RGBA encoding the repaper DRM framebuffer expects."""
-    from PIL import ImageOps
-    return ImageOps.invert(image.convert("L")).convert("RGBA").tobytes()
+def update(image: Image.Image) -> None:
+    if _simulator_mode():
+        image.save(_PREVIEW_PATH)
+        return
+    _display.image(image)
+    _display.display()
 
 
 def clear() -> None:
-    """Trigger a global refresh by writing a full-black frame.
-
-    The repaper driver fires its global waveform (black flash → white flash)
-    when it receives an all-black frame, which eliminates ghosting. The
-    subsequent page render provides the white-to-content transition.
-    """
-    black = Image.new("1", _SIZE, 0)  # 0 = black
-    with open(_FB_PATH, "wb") as fb:
-        fb.write(_encode(black))
-
-
-def update(image: Image.Image) -> None:
-    with open(_FB_PATH, "wb") as fb:
-        fb.write(_encode(image))
+    """Write a full white frame (resets display to blank state)."""
+    image = Image.new("RGB", _SIZE, (255, 255, 255))
+    update(image)
 
 
 def splash() -> None:
-    """Show a startup splash screen (white text on black) for 2 seconds."""
-    import pathlib
+    """Show a startup splash screen for 1 second."""
     import time
-    font_path = pathlib.Path(__file__).parent / "fonts" / "nokiafc22.ttf"
-    font = ImageFont.truetype(str(font_path), 8)
-
-    image = Image.new("1", _SIZE, 0)  # black background
+    font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
+    image = Image.new("RGB", _SIZE, (0, 0, 0))  # black background
     draw = ImageDraw.Draw(image)
-    text = "Loading Display..."
-    draw.text((4, 4), text, font=font, fill=1)  # white text, upper left
-    with open(_FB_PATH, "wb") as fb:
-        fb.write(_encode(image))
+    draw.text((8, 8), "Loading Display...", font=font, fill=(255, 255, 255))
+    update(image)
     time.sleep(1)
