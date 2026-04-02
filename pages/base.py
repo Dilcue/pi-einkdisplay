@@ -31,12 +31,12 @@ _DOT_RIGHT_PAD = 24
 _DOT_BOTTOM_PAD = 14
 
 
-def draw_page_dots(draw: ImageDraw.ImageDraw, active_index: int, total: int) -> None:
-    """Draw page indicator dots at bottom-right of the display."""
+def draw_page_dots(draw: ImageDraw.ImageDraw, active_index: int, total: int, bottom: int = DISPLAY_H) -> None:
+    """Draw page indicator dots at bottom-right. bottom overrides the anchor row."""
     total_w = total * _DOT_D + (total - 1) * (_DOT_SPACING - _DOT_D)
     right_x = DISPLAY_W - _DOT_RIGHT_PAD
     start_x = right_x - total_w
-    y = DISPLAY_H - _DOT_BOTTOM_PAD - _DOT_D
+    y = bottom - _DOT_BOTTOM_PAD - _DOT_D
     for i in range(total):
         x = start_x + i * _DOT_SPACING
         bbox = [x, y, x + _DOT_D, y + _DOT_D]

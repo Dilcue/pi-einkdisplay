@@ -7,9 +7,9 @@ from config import settings
 from pages.base import AppData, BLACK, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H
 
 _TIME_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
-_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 16)
+_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
 _TEMP_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
-_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 14)
+_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _GLYPH_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 80)
 
 _LEFT_PAD = 20
@@ -37,9 +37,9 @@ def render_header(draw: ImageDraw.ImageDraw, data: AppData) -> None:
         temp_x = glyph_x + 90
         draw.text((temp_x, 4), f"{w.current_temp}°", font=_TEMP_FONT, fill=RED)
 
-        # Condition + feels like (14px, below temp)
-        cond_str = f"{w.current_cond} · Feels {w.current_feels_like}°"
-        draw.text((temp_x, 62), cond_str, font=_COND_FONT, fill=BLACK)
+        # Condition + feels like (18px, two lines below temp — both clear of divider at y=100)
+        draw.text((temp_x, 58), w.current_cond, font=_COND_FONT, fill=BLACK)
+        draw.text((temp_x, 76), f"Feels Like {w.current_feels_like}°", font=_COND_FONT, fill=BLACK)
 
     # Divider line at y=100
     draw.rectangle(
