@@ -9,7 +9,7 @@ from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, draw_page_dot
 
 _DAY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
 _TIME_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 72)
-_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
+_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 28)
 
 _PAD_X = 24
 _PAD_Y = 16
@@ -18,10 +18,15 @@ _CLOCK_R = 125
 _GAP = 60
 
 _CX = _PAD_X + _CLOCK_SIZE // 2        # 164
-_CY = BODY_TOP + _PAD_Y + _CLOCK_SIZE // 2  # 260
+_BODY_CENTER_Y = (BODY_TOP + 480) // 2  # 292
+_CY = _BODY_CENTER_Y                    # analog clock centered in body
 
 _DIG_X = _PAD_X + _CLOCK_SIZE + _GAP   # 364
-_DIG_Y = BODY_TOP + _PAD_Y             # 120
+
+# Vertically center the digital block in the body area.
+# Block spans: day(0) → time(+40) → date(+120), bottom ≈ +146px
+# Body center = BODY_TOP + (480 - BODY_TOP) // 2 = 292
+_DIG_Y = (BODY_TOP + (480 - BODY_TOP) // 2) - 73  # 219
 
 
 def _hand_polygon(cx: int, cy: int, length: float, width: float, angle_rad: float) -> list:
