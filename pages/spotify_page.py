@@ -7,7 +7,7 @@ from config import settings
 from pages.base import (
     AppData, Page,
     BLACK, WHITE, RED,
-    BODY_TOP, DISPLAY_W,
+    BODY_TOP, DISPLAY_H, DISPLAY_W,
     draw_page_dots, load_font,
 )
 
@@ -21,6 +21,8 @@ _F_ICON   = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 66)
 _GREY_LIGHT = (170, 170, 170)   # progress bar background
 _GREY_MID   = (102, 102, 102)   # artist, times, idle text
 _GREY_DARK  = (68, 68, 68)      # album
+
+_LABEL_H  = 22  # advance height for 18px Nokia FC22 label
 
 _ART_X    = 24
 _ART_SIZE = 106
@@ -38,10 +40,10 @@ class SpotifyPage(Page):
 
         # Section label
         draw.text((24, BODY_TOP + 4), "NOW PLAYING", font=_F_LABEL, fill=RED)
-        label_bottom = BODY_TOP + 4 + 22
+        label_bottom = BODY_TOP + 4 + _LABEL_H
 
         # Vertically center art+info block in remaining body space
-        remaining_h = (480 - label_bottom)
+        remaining_h = (DISPLAY_H - label_bottom)
         art_y = label_bottom + (remaining_h - _ART_SIZE) // 2
 
         # Art block — solid black square
@@ -71,7 +73,7 @@ class SpotifyPage(Page):
             # Times
             draw.text((_INFO_X,               bar_y + 7), _fmt_ms(sp.progress_ms), font=_F_TIME, fill=_GREY_MID)
             dur_str = _fmt_ms(sp.duration_ms)
-            dur_w = len(dur_str) * 6
+            dur_w = int(_F_TIME.getlength(dur_str))
             draw.text((DISPLAY_W - 24 - dur_w, bar_y + 7), dur_str, font=_F_TIME, fill=_GREY_MID)
         else:
             draw.text((_INFO_X, info_y + 28), "Nothing playing", font=_F_ARTIST, fill=_GREY_MID)
