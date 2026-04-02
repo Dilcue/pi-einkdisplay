@@ -10,7 +10,7 @@ _TIME_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
 _DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
 _TEMP_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
 _COND_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
-_GLYPH_FONT = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 80)
+_GLYPH_FONT = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 96)
 
 _LEFT_PAD = 20
 _RIGHT_PAD = 20
@@ -31,7 +31,7 @@ def render_header(draw: ImageDraw.ImageDraw, data: AppData) -> None:
         w = data.weather
         # Glyph (80px CD-IconsPC)
         glyph_x = DISPLAY_W - _RIGHT_PAD - 280
-        draw.text((glyph_x, 4), w.current_icon, font=_GLYPH_FONT, fill=BLACK)
+        draw.text((glyph_x, 10), w.current_icon, font=_GLYPH_FONT, fill=BLACK)
 
         # Temp (red, 52px)
         temp_x = glyph_x + 90
