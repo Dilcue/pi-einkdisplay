@@ -1,3 +1,4 @@
+# main.py
 import logging
 import time
 
@@ -7,9 +8,9 @@ from config import settings
 from data import weather
 from data import calendar_client
 from pages.base import AppData
+from pages.header import render_header
 from pages.clock import ClockPage
-from pages.weather_current import WeatherCurrentPage
-from pages.weather_forecast import WeatherForecastPage
+from pages.weather_body import WeatherBodyPage
 from pages.calendar_page import CalendarPage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -17,8 +18,7 @@ _log = logging.getLogger(__name__)
 
 _PAGE_REGISTRY = {
     "clock": ClockPage,
-    "weather_current": WeatherCurrentPage,
-    "weather_forecast": WeatherForecastPage,
+    "weather": WeatherBodyPage,
     "calendar": CalendarPage,
 }
 
@@ -40,8 +40,6 @@ def _refresh_calendar(app_data: AppData) -> None:
 
 
 def main() -> None:
-    # Build page list inside main() so font-loading crashes are caught by the
-    # logging setup above and produce useful error messages rather than raw tracebacks.
     try:
         pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
         if not pages:
@@ -55,10 +53,10 @@ def main() -> None:
 
     display.init()
     buttons.init()
-
     display.splash()
 
     app_data = AppData()
+    app_data.total_body_pages = len(pages)
     _refresh_weather(app_data)
     _refresh_calendar(app_data)
 
@@ -72,18 +70,15 @@ def main() -> None:
             _refresh_calendar(app_data)
             last_refresh = now
 
+        app_data.body_page_index = page_index
+
         image, draw = display.new_image()
-        page = pages[page_index]
-        page.render(draw, app_data)
+        render_header(draw, app_data)
+        pages[page_index].render(draw, app_data)
         display.update(image)
 
-        buttons.wait_or_advance(settings.page_delay_seconds + page.time_bonus)
+        buttons.wait_or_advance(settings.page_delay_seconds + pages[page_index].time_bonus)
         page_index = (page_index + 1) % len(pages)
-
-        if page_index % 2 == 0:
-            _log.info("Clearing display before page %d", page_index)
-            display.clear()
-            time.sleep(0.5)
 
 
 if __name__ == "__main__":
