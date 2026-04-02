@@ -8,12 +8,14 @@ from config import settings
 from data import weather
 from data import calendar_client
 from data import cats
+from data import spotify as spotify_module
 from pages.base import AppData
 from pages.header import render_header
 from pages.clock import ClockPage
 from pages.weather_body import WeatherBodyPage
 from pages.calendar_page import CalendarPage
 from pages.cats import CatsPage
+from pages.spotify_page import SpotifyPage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 _log = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ _PAGE_REGISTRY = {
     "weather": WeatherBodyPage,
     "calendar": CalendarPage,
     "cats": CatsPage,
+    "spotify": SpotifyPage,
 }
 
 
@@ -53,6 +56,16 @@ def _refresh_cats(app_data: AppData) -> None:
         _log.error("Cat fetch failed: %s", e)
 
 
+def _refresh_spotify(app_data: AppData) -> None:
+    if not settings.spotify_enabled:
+        return
+    try:
+        app_data.spotify = spotify_module.fetch()
+        _log.info("Spotify updated (playing=%s)", app_data.spotify.playing)
+    except Exception as e:
+        _log.error("Spotify fetch failed: %s", e)
+
+
 def main() -> None:
     try:
         pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
@@ -74,6 +87,7 @@ def main() -> None:
     _refresh_weather(app_data)
     _refresh_calendar(app_data)
     _refresh_cats(app_data)
+    _refresh_spotify(app_data)
 
     last_refresh = time.time()
     page_index = 0
@@ -84,6 +98,7 @@ def main() -> None:
             _refresh_weather(app_data)
             _refresh_calendar(app_data)
             _refresh_cats(app_data)
+            _refresh_spotify(app_data)
             last_refresh = now
 
         app_data.body_page_index = page_index
@@ -91,6 +106,9 @@ def main() -> None:
         image, draw = display.new_image()
         render_header(draw, app_data)
         pages[page_index].render(draw, app_data)
+        # Spotify needs per-cycle refresh when active (track progress changes)
+        if isinstance(pages[page_index], SpotifyPage) and settings.spotify_enabled:
+            _refresh_spotify(app_data)
         # No display.clear() needed — UC8179 driver performs a full refresh on each display() call
         display.update(image)
 
