@@ -1,6 +1,7 @@
 # display.py
 import os
 import pathlib
+import time
 from PIL import Image, ImageDraw, ImageFont
 
 _WIDTH = 800
@@ -30,6 +31,8 @@ def _simulator_mode() -> bool:
 
 def init() -> None:
     global _display
+    if _display is not None:
+        return
     if _simulator_mode():
         return
     spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -53,6 +56,8 @@ def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
 
 
 def update(image: Image.Image) -> None:
+    if _display is None and not _simulator_mode():
+        raise RuntimeError("display.init() must be called before display.update()")
     if _simulator_mode():
         image.save(_PREVIEW_PATH)
         return
@@ -68,8 +73,10 @@ def clear() -> None:
 
 def splash() -> None:
     """Show a startup splash screen for 1 second."""
-    import time
-    font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
+    try:
+        font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
+    except OSError:
+        font = ImageFont.load_default()
     image = Image.new("RGB", _SIZE, (0, 0, 0))  # black background
     draw = ImageDraw.Draw(image)
     draw.text((8, 8), "Loading Display...", font=font, fill=(255, 255, 255))
