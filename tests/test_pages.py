@@ -56,3 +56,19 @@ def test_weather_body_render_no_crash():
 def test_weather_body_render_no_weather():
     _, draw = _make_draw()
     WeatherBodyPage().render(draw, AppData())
+
+
+from pages.calendar_page import CalendarPage
+from data.calendar_client import CalendarEvent
+
+
+def test_calendar_render_no_crash():
+    _, draw = _make_draw()
+    events = [CalendarEvent(summary="Team Standup", time_display="9:00 AM")]
+    data = AppData(calendar_events=events)
+    CalendarPage().render(draw, data)
+
+
+def test_calendar_render_no_events():
+    _, draw = _make_draw()
+    CalendarPage().render(draw, AppData(calendar_events=[]))
