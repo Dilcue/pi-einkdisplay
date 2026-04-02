@@ -2,18 +2,21 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 import requests
 
+_log = logging.getLogger(__name__)
+
 _DEFAULT_TOKEN_PATH = Path(__file__).parent / "spotify_token.json"
 _DEFAULT_CREDS_PATH = Path(__file__).parent / "spotify_credentials.json"
 _API_BASE = "https://api.spotify.com/v1"
 
 
-@dataclass
+@dataclass(frozen=True)
 class SpotifyData:
     playing: bool
     track: str
@@ -30,7 +33,10 @@ _IDLE = SpotifyData(playing=False, track="", artist="", album="",
 def _load_token(token_path: Path) -> dict | None:
     if not token_path.exists():
         return None
-    return json.loads(token_path.read_text())
+    try:
+        return json.loads(token_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 def _refresh_token_if_needed(token_path: Path, creds_path: Path) -> str | None:
@@ -44,7 +50,11 @@ def _refresh_token_if_needed(token_path: Path, creds_path: Path) -> str | None:
     if not creds_path.exists():
         return token.get("access_token")  # try anyway
 
-    creds = json.loads(creds_path.read_text())
+    try:
+        creds = json.loads(creds_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return token.get("access_token")
+
     resp = requests.post(
         "https://accounts.spotify.com/api/token",
         data={
@@ -55,6 +65,7 @@ def _refresh_token_if_needed(token_path: Path, creds_path: Path) -> str | None:
         timeout=10,
     )
     if resp.status_code != 200:
+        _log.warning("Token refresh failed with status %s", resp.status_code)
         return token.get("access_token")
 
     new_token = resp.json()
