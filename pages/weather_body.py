@@ -5,10 +5,10 @@ from config import settings
 from pages.base import AppData, Page, BLACK, WHITE, RED, BODY_TOP, DISPLAY_W, draw_page_dots
 
 _SECTION_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
-_GLYPH_BIG_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 150)
+_GLYPH_BIG_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 120)
 _LABEL_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 14)
 _VALUE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 22)
-_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 26)
+_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _STRIP_DAY_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _STRIP_GLYPH_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 52)
 _STRIP_TEMP_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 20)
@@ -62,11 +62,11 @@ class WeatherBodyPage(Page):
         label_y = BODY_TOP + _PAD_Y
         draw.text((_PAD_X, label_y), "WEATHER", font=_SECTION_FONT, fill=RED)
 
-        # Glyph is ~150px tall. Center it between label bottom and conditions line.
-        # Conditions line is at _STRIP_TOP - 36. Label bottom ≈ label_y + 30.
+        # Glyph is ~120px tall. Center it vertically in the content area.
+        # Conditions go below the glyph, constrained to left column (clear of detail at x=430).
         content_top = label_y + 34
         content_bottom = _STRIP_TOP - 42
-        block_h = 150  # glyph height
+        block_h = 120  # glyph height
         block_top = content_top + (content_bottom - content_top - block_h) // 2
         glyph_y = block_top
         draw.text((_BLOCK_X, glyph_y), w.current_icon, font=_GLYPH_BIG_FONT, fill=BLACK)
@@ -83,10 +83,10 @@ class WeatherBodyPage(Page):
             draw.text((detail_x, detail_y + 18), value, font=_VALUE_FONT, fill=BLACK)
             detail_y += row_gap
 
-        # Conditions line sits just above the forecast strip
-        # Conditions: two lines, left-aligned at block center, clear of dots
-        draw.text((_BLOCK_X, _STRIP_TOP - 58), w.current_desc.capitalize(), font=_COND_FONT, fill=BLACK)
-        draw.text((_BLOCK_X, _STRIP_TOP - 32), f"Feels Like {w.current_feels_like}°F", font=_COND_FONT, fill=BLACK)
+        # Conditions below glyph, left-aligned — stays within ~130px, clear of detail column
+        cond_y = glyph_y + block_h + 4
+        draw.text((_BLOCK_X, cond_y), w.current_desc.capitalize(), font=_COND_FONT, fill=BLACK)
+        draw.text((_BLOCK_X, cond_y + 20), f"Feels Like {w.current_feels_like}°F", font=_COND_FONT, fill=BLACK)
 
         _draw_forecast_strip(draw, w)
         draw_page_dots(draw, active_index=self.body_page_index, total=data.total_body_pages,
