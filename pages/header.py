@@ -4,13 +4,13 @@ from datetime import datetime
 from PIL import ImageFont, ImageDraw
 
 from config import settings
-from pages.base import AppData, BLACK, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H
+from pages.base import AppData, BLACK, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H, load_font
 
-_TIME_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
-_DATE_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
-_TEMP_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
-_COND_FONT = ImageFont.truetype(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
-_GLYPH_FONT = ImageFont.truetype(str(settings.fonts_dir / "CD-IconsPC.ttf"), 80)
+_TIME_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
+_DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
+_TEMP_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
+_COND_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
+_GLYPH_FONT = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 80)
 
 _LEFT_PAD = 20
 _RIGHT_PAD = 20

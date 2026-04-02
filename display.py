@@ -56,9 +56,10 @@ def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
 
 
 def update(image: Image.Image) -> None:
-    if _display is None and not _simulator_mode():
+    sim = _simulator_mode()
+    if _display is None and not sim:
         raise RuntimeError("display.init() must be called before display.update()")
-    if _simulator_mode():
+    if sim:
         image.save(_PREVIEW_PATH)
         return
     _display.image(image)
