@@ -33,3 +33,12 @@ def test_render_header_no_crash():
 def test_render_header_no_weather():
     _, draw = _make_draw()
     render_header(draw, AppData())  # weather=None, should not raise
+
+
+from pages.clock import ClockPage
+
+
+def test_clock_render_no_crash():
+    _, draw = _make_draw()
+    data = AppData()
+    ClockPage().render(draw, data)
