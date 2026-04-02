@@ -42,3 +42,17 @@ def test_clock_render_no_crash():
     _, draw = _make_draw()
     data = AppData()
     ClockPage().render(draw, data)
+
+
+from pages.weather_body import WeatherBodyPage
+
+
+def test_weather_body_render_no_crash():
+    _, draw = _make_draw()
+    data = AppData(weather=_stub_weather())
+    WeatherBodyPage().render(draw, data)
+
+
+def test_weather_body_render_no_weather():
+    _, draw = _make_draw()
+    WeatherBodyPage().render(draw, AppData())
