@@ -7,11 +7,13 @@ import display
 from config import settings
 from data import weather
 from data import calendar_client
+from data import cats
 from pages.base import AppData
 from pages.header import render_header
 from pages.clock import ClockPage
 from pages.weather_body import WeatherBodyPage
 from pages.calendar_page import CalendarPage
+from pages.cats import CatsPage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 _log = logging.getLogger(__name__)
@@ -20,6 +22,7 @@ _PAGE_REGISTRY = {
     "clock": ClockPage,
     "weather": WeatherBodyPage,
     "calendar": CalendarPage,
+    "cats": CatsPage,
 }
 
 
@@ -37,6 +40,17 @@ def _refresh_calendar(app_data: AppData) -> None:
         _log.info("Calendar updated (%d events)", len(app_data.calendar_events))
     except Exception as e:
         _log.error("Calendar fetch failed: %s", e)
+
+
+def _refresh_cats(app_data: AppData) -> None:
+    if not settings.cats_enabled:
+        return
+    try:
+        app_data.cats = cats.fetch(settings.cat_cache_size)
+        app_data.cat_index = 0
+        _log.info("Cats updated (%d frames)", len(app_data.cats))
+    except Exception as e:
+        _log.error("Cat fetch failed: %s", e)
 
 
 def main() -> None:
@@ -59,6 +73,7 @@ def main() -> None:
     app_data.total_body_pages = len(pages)
     _refresh_weather(app_data)
     _refresh_calendar(app_data)
+    _refresh_cats(app_data)
 
     last_refresh = time.time()
     page_index = 0
@@ -68,6 +83,7 @@ def main() -> None:
         if now - last_refresh >= refresh_interval:
             _refresh_weather(app_data)
             _refresh_calendar(app_data)
+            _refresh_cats(app_data)
             last_refresh = now
 
         app_data.body_page_index = page_index
@@ -80,6 +96,7 @@ def main() -> None:
 
         buttons.wait_or_advance(settings.page_delay_seconds + pages[page_index].time_bonus)
         page_index = (page_index + 1) % len(pages)
+        app_data.cat_index += 1
 
 
 if __name__ == "__main__":

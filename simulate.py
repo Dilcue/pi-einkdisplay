@@ -20,8 +20,10 @@ from pages.header import render_header
 from pages.clock import ClockPage
 from pages.weather_body import WeatherBodyPage
 from pages.calendar_page import CalendarPage
+from pages.cats import CatsPage
 from data.weather import WeatherReport, DayForecast
 from data.calendar_client import CalendarEvent
+from data.cats import CatFrame
 
 OUT_DIR = pathlib.Path("/tmp/einkdisplay")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -73,10 +75,16 @@ if __name__ == "__main__":
     weather = _stub_weather()
     events = _stub_events()
 
+    # Stub cat frame: solid red rectangle to confirm paste region
+    from PIL import Image as _Image
+    stub_cat_img = _Image.new("RGB", (800, 376), (255, 200, 180))
+    stub_cat = CatFrame(image=stub_cat_img)
+
     pages = [
-        ("calendar", CalendarPage(), AppData(weather=weather, calendar_events=events, body_page_index=0, total_body_pages=3)),
-        ("weather", WeatherBodyPage(), AppData(weather=weather, calendar_events=events, body_page_index=1, total_body_pages=3)),
-        ("clock", ClockPage(), AppData(weather=weather, calendar_events=events, body_page_index=2, total_body_pages=3)),
+        ("calendar", CalendarPage(), AppData(weather=weather, calendar_events=events, body_page_index=0, total_body_pages=4)),
+        ("weather", WeatherBodyPage(), AppData(weather=weather, calendar_events=events, body_page_index=1, total_body_pages=4)),
+        ("clock", ClockPage(), AppData(weather=weather, calendar_events=events, body_page_index=2, total_body_pages=4)),
+        ("cats", CatsPage(), AppData(weather=weather, cats=[stub_cat], cat_index=0, body_page_index=3, total_body_pages=4)),
     ]
 
     print(f"Rendering {len(pages)} pages to {OUT_DIR}/")
