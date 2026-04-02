@@ -30,11 +30,10 @@ _SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
-_ALL_PAGES = ["clock", "weather_current", "weather_forecast", "calendar"]
+_ALL_PAGES = ["clock", "weather", "calendar"]
 _PAGE_LABELS = {
     "clock": "Clock",
-    "weather_current": "Weather — Current",
-    "weather_forecast": "Weather — Forecast",
+    "weather": "Weather",
     "calendar": "Calendar",
 }
 
