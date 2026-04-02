@@ -33,6 +33,7 @@ class Settings:
 
         self.cats_enabled: bool = _cfg.get("cats_enabled", False)
         self.cat_cache_size: int = _cfg.get("cat_cache_size", 8)
+        self.spotify_enabled: bool = _cfg.get("spotify_enabled", False)
 
         self.credentials_path: str = str(_BASE / "credentials.json")
         self.token_path: str = str(_BASE / "token.json")
