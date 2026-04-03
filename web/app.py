@@ -4,8 +4,12 @@ import logging
 import os
 import secrets
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlencode
+
+import requests
 
 _log = logging.getLogger(__name__)
 
@@ -413,7 +417,6 @@ def spotify_oauth_start():
     creds = json.loads(_SPOTIFY_CREDS_PATH.read_text())
     state = secrets.token_hex(16)
     session["spotify_oauth_state"] = state
-    from urllib.parse import urlencode
     params = {
         "client_id": creds["client_id"],
         "response_type": "code",
@@ -427,10 +430,11 @@ def spotify_oauth_start():
 @app.route("/spotify/oauth/callback")
 def spotify_oauth_callback():
     error = request.args.get("error")
+    state_ok = request.args.get("state") == session.pop("spotify_oauth_state", None)
     if error:
         flash(f"Spotify authorization denied: {error}", "danger")
         return redirect(url_for("spotify"))
-    if request.args.get("state") != session.pop("spotify_oauth_state", None):
+    if not state_ok:
         flash("Authorization failed: invalid state.", "danger")
         return redirect(url_for("spotify"))
     try:
@@ -438,8 +442,7 @@ def spotify_oauth_callback():
         auth = base64.b64encode(
             f"{creds['client_id']}:{creds['client_secret']}".encode()
         ).decode()
-        import requests as _requests
-        resp = _requests.post(
+        resp = requests.post(
             _SPOTIFY_TOKEN_URL,
             data={
                 "grant_type": "authorization_code",
@@ -450,10 +453,15 @@ def spotify_oauth_callback():
             timeout=10,
         )
         resp.raise_for_status()
-        import time as _time
         token_data = resp.json()
-        token_data["expires_at"] = int(_time.time()) + token_data.get("expires_in", 3600)
-        _SPOTIFY_TOKEN_PATH.write_text(json.dumps(token_data))
+        token_data["expires_at"] = int(time.time()) + token_data.get("expires_in", 3600)
+        _tmp = _SPOTIFY_TOKEN_PATH.with_suffix(".json.tmp")
+        try:
+            _tmp.write_text(json.dumps(token_data))
+            _tmp.rename(_SPOTIFY_TOKEN_PATH)
+        except Exception:
+            _tmp.unlink(missing_ok=True)
+            raise
         flash("Spotify account authorized successfully.", "success")
     except Exception:
         _log.exception("Spotify OAuth callback failed")
