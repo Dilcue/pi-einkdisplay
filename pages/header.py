@@ -7,6 +7,7 @@ from config import settings
 from pages.base import AppData, BLACK, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H, load_font
 
 _TIME_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
+_ISH_FONT  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 16)
 _DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
 _TEMP_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
 _COND_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
@@ -21,8 +22,10 @@ def render_header(draw: ImageDraw.ImageDraw, data: AppData) -> None:
     time_str = now.strftime("%-I:%M %p")
     date_str = now.strftime("%B %d, %Y")
 
-    # Left: time
+    # Left: time + "ish" in tiny font
     draw.text((_LEFT_PAD, 4), time_str, font=_TIME_FONT, fill=BLACK)
+    ish_x = _LEFT_PAD + int(draw.textlength(time_str, font=_TIME_FONT)) + 4
+    draw.text((ish_x, 46), "ish", font=_ISH_FONT, fill=BLACK)
     # Left: date below time
     draw.text((_LEFT_PAD, 62), date_str, font=_DATE_FONT, fill=BLACK)
 

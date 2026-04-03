@@ -62,6 +62,7 @@ def update(image: Image.Image) -> None:
     if sim:
         image.save(_PREVIEW_PATH)
         return
+    image.save(_PREVIEW_PATH)
     _display.image(image)
     _display.display()
 
@@ -73,7 +74,7 @@ def clear() -> None:
 
 
 def splash() -> None:
-    """Show a startup splash screen for 1 second."""
+    """Show a startup splash screen."""
     try:
         font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
     except OSError:
