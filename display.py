@@ -46,7 +46,7 @@ def init() -> None:
         rst_pin=rst, busy_pin=busy,
         tri_color=True,
     )
-    _display.rotation = 1
+    _display.rotation = 0
 
 
 def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
