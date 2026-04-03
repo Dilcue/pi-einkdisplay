@@ -107,10 +107,10 @@ def main() -> None:
         if isinstance(pages[page_index], SpotifyPage) and settings.spotify_enabled:
             _refresh_spotify(app_data)
 
+        display.transition()
         image, draw = display.new_image()
         render_header(draw, app_data)
         pages[page_index].render(draw, app_data)
-        # No display.clear() needed — UC8179 driver performs a full refresh on each display() call
         display.update(image)
 
         buttons.wait_or_advance(settings.page_delay_seconds + pages[page_index].time_bonus)
