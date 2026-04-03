@@ -103,12 +103,13 @@ def main() -> None:
 
         app_data.body_page_index = page_index
 
+        # Spotify fast-poll when active — refresh before render so current data is shown
+        if isinstance(pages[page_index], SpotifyPage) and settings.spotify_enabled:
+            _refresh_spotify(app_data)
+
         image, draw = display.new_image()
         render_header(draw, app_data)
         pages[page_index].render(draw, app_data)
-        # Spotify needs per-cycle refresh when active (track progress changes)
-        if isinstance(pages[page_index], SpotifyPage) and settings.spotify_enabled:
-            _refresh_spotify(app_data)
         # No display.clear() needed — UC8179 driver performs a full refresh on each display() call
         display.update(image)
 
