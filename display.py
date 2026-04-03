@@ -18,6 +18,7 @@ try:
     import busio
     import digitalio
     from adafruit_epd.uc8179 import Adafruit_UC8179
+    from adafruit_epd.epd import Adafruit_EPD as _Adafruit_EPD
     _HW_AVAILABLE = True
 except ImportError:
     pass
@@ -53,6 +54,16 @@ def new_image() -> tuple[Image.Image, ImageDraw.ImageDraw]:
     image = Image.new("RGB", _SIZE, (255, 255, 255))  # white background
     draw = ImageDraw.Draw(image)
     return image, draw
+
+
+def transition() -> None:
+    """Flash black then red between pages to clear the panel."""
+    if _simulator_mode() or _display is None:
+        return
+    _display.fill(_Adafruit_EPD.BLACK)
+    _display.display()
+    _display.fill(_Adafruit_EPD.RED)
+    _display.display()
 
 
 def update(image: Image.Image) -> None:
