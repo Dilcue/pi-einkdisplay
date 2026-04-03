@@ -24,18 +24,24 @@ _CONFIG_PATH = _BASE / "config.json"
 _ENV_PATH = _BASE / ".env"
 _CREDENTIALS_PATH = _BASE / "credentials.json"
 _TOKEN_PATH = _BASE / "token.json"
+_SPOTIFY_TOKEN_PATH = _BASE / "data" / "spotify_token.json"
+_SPOTIFY_CREDS_PATH = _BASE / "data" / "spotify_credentials.json"
+_SPOTIFY_SCOPES = "user-read-currently-playing user-read-playback-state"
+_SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
+_SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 _SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
-_ALL_PAGES = ["clock", "weather", "calendar", "cats"]
+_ALL_PAGES = ["clock", "weather", "calendar", "cats", "spotify"]
 _PAGE_LABELS = {
     "clock": "Clock",
     "weather": "Weather",
     "calendar": "Calendar",
     "cats": "Cats",
+    "spotify": "Spotify",
 }
 
 
@@ -148,6 +154,17 @@ def _all_calendars() -> list[dict]:
         return [{"id": c["id"], "name": c["summary"]} for c in items]
     except Exception:
         return []
+
+
+def _spotify_connected() -> str | None:
+    """Return display name / 'Connected' if Spotify token exists, else None."""
+    if not _SPOTIFY_TOKEN_PATH.exists():
+        return None
+    try:
+        data = json.loads(_SPOTIFY_TOKEN_PATH.read_text())
+        return data.get("display_name") or data.get("email") or "Connected"
+    except Exception:
+        return None
 
 
 def _oauth_connected_email() -> str | None:
@@ -370,6 +387,86 @@ def cats_settings():
         return redirect(url_for("cats_settings"))
 
     return render_template("cats.html", cfg=cfg)
+
+
+@app.route("/spotify", methods=["GET", "POST"])
+def spotify():
+    cfg = _load_config()
+    if request.method == "POST":
+        cfg["spotify_enabled"] = "spotify_enabled" in request.form
+        _save_config(cfg)
+        try:
+            _restart_display()
+            flash("Spotify settings saved.", "success")
+        except RuntimeError:
+            flash("Settings saved but display restart failed.", "warning")
+        return redirect(url_for("spotify"))
+    connected = _spotify_connected()
+    return render_template("spotify.html", cfg=cfg, spotify_connected=connected)
+
+
+@app.route("/spotify/oauth/start")
+def spotify_oauth_start():
+    if not _SPOTIFY_CREDS_PATH.exists():
+        flash("spotify_credentials.json not found on the server.", "danger")
+        return redirect(url_for("spotify"))
+    creds = json.loads(_SPOTIFY_CREDS_PATH.read_text())
+    state = secrets.token_hex(16)
+    session["spotify_oauth_state"] = state
+    from urllib.parse import urlencode
+    params = {
+        "client_id": creds["client_id"],
+        "response_type": "code",
+        "redirect_uri": url_for("spotify_oauth_callback", _external=True),
+        "scope": _SPOTIFY_SCOPES,
+        "state": state,
+    }
+    return redirect(f"{_SPOTIFY_AUTH_URL}?{urlencode(params)}")
+
+
+@app.route("/spotify/oauth/callback")
+def spotify_oauth_callback():
+    error = request.args.get("error")
+    if error:
+        flash(f"Spotify authorization denied: {error}", "danger")
+        return redirect(url_for("spotify"))
+    if request.args.get("state") != session.pop("spotify_oauth_state", None):
+        flash("Authorization failed: invalid state.", "danger")
+        return redirect(url_for("spotify"))
+    try:
+        creds = json.loads(_SPOTIFY_CREDS_PATH.read_text())
+        auth = base64.b64encode(
+            f"{creds['client_id']}:{creds['client_secret']}".encode()
+        ).decode()
+        import requests as _requests
+        resp = _requests.post(
+            _SPOTIFY_TOKEN_URL,
+            data={
+                "grant_type": "authorization_code",
+                "code": request.args.get("code"),
+                "redirect_uri": url_for("spotify_oauth_callback", _external=True),
+            },
+            headers={"Authorization": f"Basic {auth}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        import time as _time
+        token_data = resp.json()
+        token_data["expires_at"] = int(_time.time()) + token_data.get("expires_in", 3600)
+        _SPOTIFY_TOKEN_PATH.write_text(json.dumps(token_data))
+        flash("Spotify account authorized successfully.", "success")
+    except Exception:
+        _log.exception("Spotify OAuth callback failed")
+        flash("Authorization failed. Please try again.", "danger")
+    return redirect(url_for("spotify"))
+
+
+@app.route("/spotify/oauth/revoke", methods=["POST"])
+def spotify_oauth_revoke():
+    if _SPOTIFY_TOKEN_PATH.exists():
+        _SPOTIFY_TOKEN_PATH.unlink()
+        flash("Spotify disconnected.", "success")
+    return redirect(url_for("spotify"))
 
 
 if __name__ == "__main__":
