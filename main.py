@@ -107,7 +107,6 @@ def main() -> None:
         if isinstance(pages[page_index], SpotifyPage) and settings.spotify_enabled:
             _refresh_spotify(app_data)
 
-        display.transition()
         image, draw = display.new_image()
         render_header(draw, app_data)
         pages[page_index].render(draw, app_data)
