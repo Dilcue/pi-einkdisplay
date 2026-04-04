@@ -17,9 +17,9 @@ _F_STRIP_TEMP = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 20)
 _F_STRIP_COND = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 14)
 _F_EMPTY = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 14)
 
-_STRIP_H = 120
-_STRIP_TOP = DISPLAY_H - _STRIP_H           # 360
-_EVENTS_H = _STRIP_TOP - BODY_TOP           # 256
+_STRIP_H = 121
+_STRIP_TOP = DISPLAY_H - _STRIP_H           # 359
+_EVENTS_H = _STRIP_TOP - BODY_TOP           # 255 — exactly divisible by 5
 _EVENT_COUNT = 5
 _EVENT_H = _EVENTS_H // _EVENT_COUNT        # 51
 _PAD_X = 16

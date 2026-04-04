@@ -26,14 +26,9 @@ class Settings:
         self.calendar_max_events: int = _cfg["calendar_max_events"]
         self.page_delay_seconds: int = _cfg["page_delay_seconds"]
         self.data_refresh_minutes: int = _cfg["data_refresh_minutes"]
-        self.pages: list = _cfg["pages"]
 
         # Optional at startup — weather fetch will fail gracefully if absent
         self.owm_api_key: str = os.environ.get("OPEN_WEATHER_MAP_API_KEY", "")
-
-        self.cats_enabled: bool = _cfg.get("cats_enabled", False)
-        self.cat_cache_size: int = _cfg.get("cat_cache_size", 8)
-        self.spotify_enabled: bool = _cfg.get("spotify_enabled", False)
 
         self.credentials_path: str = str(_BASE / "credentials.json")
         self.token_path: str = str(_BASE / "token.json")
