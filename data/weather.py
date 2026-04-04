@@ -33,6 +33,8 @@ class WeatherReport:
     today: DayForecast
     tomorrow: DayForecast
     day3: DayForecast
+    day4: DayForecast
+    day5: DayForecast
 
 
 def fetch() -> WeatherReport:
@@ -94,4 +96,6 @@ def fetch() -> WeatherReport:
         today=_day(future_days[0], force_day=is_day) if len(future_days) > 0 else DayForecast("---", "--/--", "---", ""),
         tomorrow=_day(future_days[1], force_day=True) if len(future_days) > 1 else DayForecast("---", "--/--", "---", ""),
         day3=_day(future_days[2], force_day=True) if len(future_days) > 2 else DayForecast("---", "--/--", "---", ""),
+        day4=_day(future_days[3], force_day=True) if len(future_days) > 3 else DayForecast("---", "--/--", "---", ""),
+        day5=_day(future_days[4], force_day=True) if len(future_days) > 4 else DayForecast("---", "--/--", "---", ""),
     )

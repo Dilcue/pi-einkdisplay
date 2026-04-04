@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Cats</h1>
+
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="card">
+    <h2>Cat Photos</h2>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" name="cats_enabled" value="1" {% if cfg.get('cats_enabled') %}checked{% endif %}>
+        Enable cat page
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="cat_cache_size">Photos per refresh cycle</label>
+      <input type="number" id="cat_cache_size" name="cat_cache_size" class="narrow"
+             min="1" max="20" value="{{ cfg.get('cat_cache_size', 8) }}">
+    </div>
+    <p style="font-size:13px;color:#666;margin-bottom:16px;">
+      Fetches N cat photos from The Cat API at each data refresh. Cycles through them on every page rotation. No API key required.
+    </p>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+{% endblock %}
