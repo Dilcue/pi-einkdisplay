@@ -1,3 +1,4 @@
+# main.py
 import logging
 import time
 
@@ -7,20 +8,11 @@ from config import settings
 from data import weather
 from data import calendar_client
 from pages.base import AppData
-from pages.clock import ClockPage
-from pages.weather_current import WeatherCurrentPage
-from pages.weather_forecast import WeatherForecastPage
-from pages.calendar_page import CalendarPage
+from pages.header import render_header
+from pages.dashboard import DashboardPage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 _log = logging.getLogger(__name__)
-
-_PAGE_REGISTRY = {
-    "clock": ClockPage,
-    "weather_current": WeatherCurrentPage,
-    "weather_forecast": WeatherForecastPage,
-    "calendar": CalendarPage,
-}
 
 
 def _refresh_weather(app_data: AppData) -> None:
@@ -39,23 +31,20 @@ def _refresh_calendar(app_data: AppData) -> None:
         _log.error("Calendar fetch failed: %s", e)
 
 
-def main() -> None:
-    # Build page list inside main() so font-loading crashes are caught by the
-    # logging setup above and produce useful error messages rather than raw tracebacks.
-    try:
-        pages = [_PAGE_REGISTRY[p]() for p in settings.pages if p in _PAGE_REGISTRY]
-        if not pages:
-            _log.error("No valid pages configured — check 'pages' in config.json")
-            return
-    except Exception as e:
-        _log.error("Failed to initialize pages: %s", e)
-        return
+def _fingerprint(app_data: AppData) -> str:
+    """Returns a string that changes when calendar or weather data changes."""
+    w = app_data.weather
+    w_part = f"{w.current_temp}|{w.current_cond}|{w.tomorrow.temp}|{w.day3.temp}|{w.day4.temp}|{w.day5.temp}" if w else ""
+    events = app_data.calendar_events or []
+    e_part = "|".join(f"{e.summary}~{e.time_display}" for e in events[:5])
+    return f"{w_part}#{e_part}"
 
+
+def main() -> None:
     refresh_interval = settings.data_refresh_minutes * 60
 
     display.init()
     buttons.init()
-
     display.splash()
 
     app_data = AppData()
@@ -63,7 +52,8 @@ def main() -> None:
     _refresh_calendar(app_data)
 
     last_refresh = time.time()
-    page_index = 0
+    last_fp = None
+    page = DashboardPage()
 
     while True:
         now = time.time()
@@ -72,18 +62,16 @@ def main() -> None:
             _refresh_calendar(app_data)
             last_refresh = now
 
-        image, draw = display.new_image()
-        page = pages[page_index]
-        page.render(draw, app_data)
-        display.update(image)
+        fp = _fingerprint(app_data)
+        if fp != last_fp:
+            image, draw = display.new_image()
+            render_header(draw, app_data)
+            page.render(draw, app_data)
+            display.update(image)
+            last_fp = fp
+            _log.info("Display refreshed (data changed)")
 
-        buttons.wait_or_advance(settings.page_delay_seconds + page.time_bonus)
-        page_index = (page_index + 1) % len(pages)
-
-        if page_index % 2 == 0:
-            _log.info("Clearing display before page %d", page_index)
-            display.clear()
-            time.sleep(0.5)
+        buttons.wait_or_advance(settings.data_refresh_minutes * 60)
 
 
 if __name__ == "__main__":

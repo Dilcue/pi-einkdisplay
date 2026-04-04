@@ -1,6 +1,8 @@
 credentials.json
 token.json
 config.json
+data/spotify_token.json
+data/spotify_credentials.json
 *.pyc
 __pycache__/
 .env
