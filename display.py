@@ -62,7 +62,6 @@ def update(image: Image.Image) -> None:
     if sim:
         image.save(_PREVIEW_PATH)
         return
-    image.save(_PREVIEW_PATH)
     _display.image(image)
     _display.display()
 
