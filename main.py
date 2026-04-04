@@ -31,6 +31,15 @@ def _refresh_calendar(app_data: AppData) -> None:
         _log.error("Calendar fetch failed: %s", e)
 
 
+def _fingerprint(app_data: AppData) -> str:
+    """Returns a string that changes when calendar or weather data changes."""
+    w = app_data.weather
+    w_part = f"{w.current_temp}|{w.current_cond}|{w.tomorrow.temp}|{w.day3.temp}|{w.day4.temp}|{w.day5.temp}" if w else ""
+    events = app_data.calendar_events or []
+    e_part = "|".join(f"{e.summary}~{e.time_display}" for e in events[:5])
+    return f"{w_part}#{e_part}"
+
+
 def main() -> None:
     refresh_interval = settings.data_refresh_minutes * 60
 
@@ -43,6 +52,7 @@ def main() -> None:
     _refresh_calendar(app_data)
 
     last_refresh = time.time()
+    last_fp = None
     page = DashboardPage()
 
     while True:
@@ -52,12 +62,16 @@ def main() -> None:
             _refresh_calendar(app_data)
             last_refresh = now
 
-        image, draw = display.new_image()
-        render_header(draw, app_data)
-        page.render(draw, app_data)
-        display.update(image)
+        fp = _fingerprint(app_data)
+        if fp != last_fp:
+            image, draw = display.new_image()
+            render_header(draw, app_data)
+            page.render(draw, app_data)
+            display.update(image)
+            last_fp = fp
+            _log.info("Display refreshed (data changed)")
 
-        buttons.wait_or_advance(settings.page_delay_seconds)
+        buttons.wait_or_advance(settings.data_refresh_minutes * 60)
 
 
 if __name__ == "__main__":

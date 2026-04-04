@@ -6,9 +6,8 @@ from PIL import ImageFont, ImageDraw
 from config import settings
 from pages.base import AppData, BLACK, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H, load_font
 
-_TIME_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
-_ISH_FONT  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 16)
-_DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 24)
+_DATE_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 36)
+_DAY_FONT  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
 _TEMP_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 52)
 _COND_FONT = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _GLYPH_FONT = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 96)
@@ -19,15 +18,12 @@ _RIGHT_PAD = 20
 
 def render_header(draw: ImageDraw.ImageDraw, data: AppData) -> None:
     now = datetime.now()
-    time_str = now.strftime("%-I:%M %p")
-    date_str = now.strftime("%B %d, %Y")
+    day_str  = now.strftime("%A")
+    date_str = now.strftime("%B %-d, %Y")
 
-    # Left: time + "ish" in tiny font
-    draw.text((_LEFT_PAD, 4), time_str, font=_TIME_FONT, fill=BLACK)
-    ish_x = _LEFT_PAD + int(draw.textlength(time_str, font=_TIME_FONT)) + 4
-    draw.text((ish_x, 46), "ish", font=_ISH_FONT, fill=BLACK)
-    # Left: date below time
-    draw.text((_LEFT_PAD, 62), date_str, font=_DATE_FONT, fill=BLACK)
+    # Left: day name on top, date below
+    draw.text((_LEFT_PAD, 4),  day_str,  font=_DAY_FONT,  fill=BLACK)
+    draw.text((_LEFT_PAD, 60), date_str, font=_DATE_FONT, fill=BLACK)
 
     # Right: weather glyph + temp + condition
     if data.weather is not None:
