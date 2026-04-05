@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import dateutil.parser
 from google.auth.transport.requests import Request
@@ -56,7 +56,11 @@ def _format_event(event: dict) -> CalendarEvent:
     end = dateutil.parser.parse(event["end"].get("dateTime") or event["end"].get("date"))
 
     if all_day:
-        time_display = start.strftime("%a %b %d") + " (All Day)"
+        end_display = end - timedelta(days=1)  # Google end date is exclusive
+        if end_display.date() == start.date():
+            time_display = start.strftime("%b %-d")
+        else:
+            time_display = start.strftime("%b %-d") + " – " + end_display.strftime("%b %-d")
     elif start == end:
         time_display = start.strftime("%a %b %d, %-I:%M %p")
     elif start.date() == end.date():
