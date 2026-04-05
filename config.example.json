@@ -7,7 +7,5 @@
     "calendar_max_events": 5,
     "page_delay_seconds": 7,
     "data_refresh_minutes": 60,
-    "pages": ["clock", "weather", "calendar"],
-    "cats_enabled": false,
-    "cat_cache_size": 8
+    "pages": ["clock", "weather", "calendar"]
 }

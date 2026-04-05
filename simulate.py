@@ -5,7 +5,7 @@ simulate.py — render all pages to PNG files for visual inspection.
 Usage:
     EINK_SIMULATE=1 python3 simulate.py
 
-Output: /tmp/einkdisplay/clock.png, weather.png, calendar.png
+Output: /tmp/einkdisplay/dashboard.png
 """
 import os
 import pathlib
@@ -17,13 +17,9 @@ from PIL import Image, ImageDraw
 import display
 from pages.base import AppData, WHITE
 from pages.header import render_header
-from pages.clock import ClockPage
-from pages.weather_body import WeatherBodyPage
-from pages.calendar_page import CalendarPage
-from pages.cats import CatsPage
+from pages.dashboard import DashboardPage
 from data.weather import WeatherReport, DayForecast
 from data.calendar_client import CalendarEvent
-from data.cats import CatFrame
 
 OUT_DIR = pathlib.Path("/tmp/einkdisplay")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -57,37 +53,19 @@ def _stub_events() -> list:
         CalendarEvent(summary="Lunch with Sarah", time_display="12:30 PM"),
         CalendarEvent(summary="Sprint Review", time_display="Wed Apr 2, 2:00 PM"),
         CalendarEvent(summary="Doctor Appointment", time_display="Thu Apr 3, 10:00 AM"),
-        CalendarEvent(summary="Family Dinner", time_display="Fri Apr 4 (All Day)"),
+        CalendarEvent(summary="Family Dinner", time_display="Apr 4 (All Day)"),
     ]
-
-
-def render_page(name: str, page, data: AppData) -> None:
-    image = Image.new("RGB", (800, 480), WHITE)
-    draw = ImageDraw.Draw(image)
-    render_header(draw, data)
-    page.render(draw, data)
-    out = OUT_DIR / f"{name}.png"
-    image.save(str(out))
-    print(f"  Saved {out}")
 
 
 if __name__ == "__main__":
     weather = _stub_weather()
     events = _stub_events()
+    data = AppData(weather=weather, calendar_events=events)
 
-    # Stub cat frame: solid red rectangle to confirm paste region
-    from PIL import Image as _Image
-    stub_cat_img = _Image.new("RGB", (800, 376), (255, 200, 180))
-    stub_cat = CatFrame(image=stub_cat_img)
-
-    pages = [
-        ("calendar", CalendarPage(), AppData(weather=weather, calendar_events=events, body_page_index=0, total_body_pages=4)),
-        ("weather", WeatherBodyPage(), AppData(weather=weather, calendar_events=events, body_page_index=1, total_body_pages=4)),
-        ("clock", ClockPage(), AppData(weather=weather, calendar_events=events, body_page_index=2, total_body_pages=4)),
-        ("cats", CatsPage(), AppData(weather=weather, cats=[stub_cat], cat_index=0, body_page_index=3, total_body_pages=4)),
-    ]
-
-    print(f"Rendering {len(pages)} pages to {OUT_DIR}/")
-    for name, page, data in pages:
-        render_page(name, page, data)
-    print("Done. Open the PNGs to inspect layout.")
+    image = Image.new("RGB", (800, 480), WHITE)
+    draw = ImageDraw.Draw(image)
+    render_header(draw, data)
+    DashboardPage().render(draw, data)
+    out = OUT_DIR / "dashboard.png"
+    image.save(str(out))
+    print(f"Saved {out}")
