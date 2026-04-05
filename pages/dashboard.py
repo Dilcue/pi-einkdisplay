@@ -9,8 +9,7 @@ from pages.base import (
     load_font,
 )
 
-_F_EVT_TIME  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
-_F_EVT_TITLE = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
+_F_EVT  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _F_STRIP_DAY  = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 18)
 _F_STRIP_ICON = load_font(str(settings.fonts_dir / "CD-IconsPC.ttf"), 52)
 _F_STRIP_TEMP = load_font(str(settings.fonts_dir / "nokiafc22.ttf"), 20)
@@ -46,12 +45,12 @@ def _draw_events(draw: ImageDraw.ImageDraw, events: list) -> None:
 
         if i < len(events):
             ev = events[i]
-            time_text = _truncate(draw, ev.time_display, _F_EVT_TIME, _MAX_TIME_W)
-            draw.text((_PAD_X, text_y), time_text, font=_F_EVT_TIME, fill=RED)
-            name_text = _truncate(draw, ev.summary, _F_EVT_TITLE, _MAX_NAME_W)
-            draw.text((_NAME_X + _PAD_X, text_y), name_text, font=_F_EVT_TITLE, fill=RED)
+            time_text = _truncate(draw, ev.time_display, _F_EVT, _MAX_TIME_W)
+            draw.text((_PAD_X, text_y), time_text, font=_F_EVT, fill=RED)
+            name_text = _truncate(draw, ev.summary, _F_EVT, _MAX_NAME_W)
+            draw.text((_NAME_X + _PAD_X, text_y), name_text, font=_F_EVT, fill=RED)
         else:
-            draw.text((_PAD_X, text_y), "—", font=_F_EVT_TIME, fill=RED)
+            draw.text((_PAD_X, text_y), "—", font=_F_EVT, fill=RED)
 
 
 def _draw_forecast_strip(draw: ImageDraw.ImageDraw, w) -> None:

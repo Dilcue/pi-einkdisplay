@@ -15,12 +15,9 @@ _BODY_H = 376  # DISPLAY_H(480) - BODY_TOP(104)
 
 # Palette image used by PIL's C-accelerated quantize: black, white, red
 _PALETTE_IMG = Image.new("P", (1, 1))
-_PALETTE_IMG.putpalette(
-    [0, 0, 0,         # index 0 = black
-     255, 255, 255,   # index 1 = white
-     255, 0, 0]       # index 2 = red
-    + [0] * (256 * 3 - 9)
-)
+_palette_entries = [0, 0, 0, 255, 255, 255, 255, 0, 0]  # black, white, red
+# Fill remaining 253 entries with white so out-of-range indices don't map to black
+_PALETTE_IMG.putpalette(_palette_entries + [255, 255, 255] * (256 - 3))
 
 
 @dataclass

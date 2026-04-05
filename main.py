@@ -34,7 +34,7 @@ def _refresh_calendar(app_data: AppData) -> None:
 def _fingerprint(app_data: AppData) -> str:
     """Returns a string that changes when calendar or weather data changes."""
     w = app_data.weather
-    w_part = f"{w.current_temp}|{w.current_cond}|{w.tomorrow.temp}|{w.day3.temp}|{w.day4.temp}|{w.day5.temp}" if w else ""
+    w_part = f"{w.current_temp}|{w.current_cond}|{w.current_feels_like}|{w.today.temp}|{w.tomorrow.temp}|{w.day3.temp}|{w.day4.temp}|{w.day5.temp}" if w else ""
     events = app_data.calendar_events or []
     e_part = "|".join(f"{e.summary}~{e.time_display}" for e in events[:5])
     return f"{w_part}#{e_part}"

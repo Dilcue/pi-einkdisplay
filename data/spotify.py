@@ -73,7 +73,13 @@ def _refresh_token_if_needed(token_path: Path, creds_path: Path) -> str | None:
     token["expires_at"] = int(time.time()) + new_token.get("expires_in", 3600)
     if "refresh_token" in new_token:
         token["refresh_token"] = new_token["refresh_token"]
-    token_path.write_text(json.dumps(token))
+    tmp = token_path.with_suffix(".json.tmp")
+    try:
+        tmp.write_text(json.dumps(token))
+        tmp.rename(token_path)
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        raise
     return token["access_token"]
 
 
