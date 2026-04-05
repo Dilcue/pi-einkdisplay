@@ -48,14 +48,17 @@ def test_no_summary_fallback():
 
 
 def test_zero_duration_timed_event():
-    # start == end treated as point-in-time
+    # start == end treated as point-in-time — full date+time format
     event = _make_event("2026-04-05T09:00:00-04:00", "2026-04-05T09:00:00-04:00")
     result = _format_event(event)
     assert "9:00" in result.time_display
+    assert "AM" in result.time_display
 
 
 def test_multi_day_timed_event():
     event = _make_event("2026-04-05T22:00:00-04:00", "2026-04-06T06:00:00-04:00")
     result = _format_event(event)
-    # Should include both dates
-    assert result.time_display  # non-empty
+    # Use day-of-week names — consistent across platforms unlike %-d zero-padding
+    assert "Sun" in result.time_display
+    assert "Mon" in result.time_display
+    assert "Apr" in result.time_display

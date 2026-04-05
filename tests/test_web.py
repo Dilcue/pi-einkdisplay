@@ -72,7 +72,7 @@ def test_calendar_post_saves_and_redirects(client, monkeypatch, tmp_path):
     assert cfg["calendar_max_events"] == 5
 
 
-def test_calendar_max_events_clamped(client, monkeypatch):
+def test_calendar_max_events_clamped(client, monkeypatch, tmp_path):
     import web.app as webapp
     monkeypatch.setattr(webapp, "_restart_display", lambda: None)
     resp = client.post("/calendar", data={
@@ -80,6 +80,8 @@ def test_calendar_max_events_clamped(client, monkeypatch):
         "calendar_max_events": "999",
     })
     assert resp.status_code == 302
+    cfg = json.loads((tmp_path / "config.json").read_text())
+    assert cfg["calendar_max_events"] == 5  # clamped from 999
 
 
 def test_weather_get_returns_200(client, monkeypatch):
@@ -101,22 +103,26 @@ def test_weather_post_valid(client, monkeypatch):
     assert resp.status_code == 302
 
 
-def test_weather_post_invalid_lat(client, monkeypatch):
+def test_weather_post_invalid_lat(client, monkeypatch, tmp_path):
     import web.app as webapp
+    original_lat = json.loads((tmp_path / "config.json").read_text())["latitude"]
     resp = client.post("/weather", data={
         "location_name": "Nowhere",
         "latitude": "999",
         "longitude": "0",
         "data_refresh_minutes": "60",
     })
-    assert resp.status_code == 302  # redirect back with flash
+    assert resp.status_code == 302
+    # Config must NOT have been updated with the invalid value
+    cfg = json.loads((tmp_path / "config.json").read_text())
+    assert cfg["latitude"] == original_lat
 
 
 def test_system_get_returns_200(client, monkeypatch):
     import web.app as webapp
     monkeypatch.setattr(webapp, "_service_status", lambda: "active")
     monkeypatch.setattr(webapp, "_service_uptime", lambda: "1h 0m")
-    monkeypatch.setattr(webapp, "_recent_logs", lambda lines=50: "log line 1\nlog line 2")
+    monkeypatch.setattr(webapp, "_recent_logs", lambda: "log line 1\nlog line 2")
     resp = client.get("/system")
     assert resp.status_code == 200
 
@@ -174,3 +180,20 @@ def test_save_config_atomic(tmp_path, monkeypatch):
     webapp._save_config({"key": "value"})
     assert json.loads(config_path.read_text()) == {"key": "value"}
     assert not (tmp_path / "config.json.tmp").exists()
+
+
+def test_index_returns_500_on_bad_config(client, monkeypatch):
+    import web.app as webapp
+    monkeypatch.setattr(webapp, "_load_config", lambda: (_ for _ in ()).throw(RuntimeError("bad config")))
+    resp = client.get("/")
+    assert resp.status_code == 500
+    assert b"Config error" in resp.data
+
+
+def test_oauth_start_no_credentials(client, monkeypatch, tmp_path):
+    import web.app as webapp
+    # credentials.json does not exist — should flash danger and redirect
+    monkeypatch.setattr(webapp, "_CREDENTIALS_PATH", tmp_path / "missing_credentials.json")
+    resp = client.get("/oauth/start")
+    assert resp.status_code == 302
+    assert "/calendar" in resp.headers["Location"]
