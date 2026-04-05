@@ -255,7 +255,7 @@ def oauth_start():
         str(_CREDENTIALS_PATH), scopes=_SCOPES,
         redirect_uri=url_for("oauth_callback", _external=True)
     )
-    auth_url, state = flow.authorization_url(prompt="consent", access_type="offline")
+    auth_url, state = flow.authorization_url(prompt="select_account consent", access_type="offline")
     session["oauth_state"] = state
     return redirect(auth_url)
 
