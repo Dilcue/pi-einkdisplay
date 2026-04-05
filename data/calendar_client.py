@@ -60,7 +60,7 @@ def _format_event(event: dict) -> CalendarEvent:
         if end_display.date() == start.date():
             time_display = start.strftime("%b %-d") + " (All Day)"
         else:
-            time_display = start.strftime("%b %-d") + " – " + end_display.strftime("%b %-d")
+            time_display = start.strftime("%b %-d") + " - " + end_display.strftime("%b %-d")
     elif start == end:
         time_display = start.strftime("%a %b %d, %-I:%M %p")
     elif start.date() == end.date():
