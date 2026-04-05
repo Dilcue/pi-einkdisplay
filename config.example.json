@@ -2,10 +2,7 @@
     "location_name": "Your City, State",
     "latitude": "0.000000",
     "longitude": "0.000000",
-    "calendar_display_name": "Your Calendar Name",
     "calendar_ids": [],
     "calendar_max_events": 5,
-    "page_delay_seconds": 7,
-    "data_refresh_minutes": 60,
-    "pages": ["clock", "weather", "calendar"]
+    "data_refresh_minutes": 60
 }

@@ -21,10 +21,8 @@ class Settings:
         self.location_name: str = _cfg["location_name"]
         self.latitude: str = _cfg["latitude"]
         self.longitude: str = _cfg["longitude"]
-        self.calendar_display_name: str = _cfg["calendar_display_name"]
         self.calendar_ids: list = _cfg["calendar_ids"]
         self.calendar_max_events: int = _cfg["calendar_max_events"]
-        self.page_delay_seconds: int = _cfg["page_delay_seconds"]
         self.data_refresh_minutes: int = _cfg["data_refresh_minutes"]
 
         # Optional at startup — weather fetch will fail gracefully if absent

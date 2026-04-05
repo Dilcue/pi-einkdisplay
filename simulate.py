@@ -28,15 +28,8 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 def _stub_weather() -> WeatherReport:
     d = DayForecast
     return WeatherReport(
-        last_update="9:41",
         current_temp="52",
         current_cond="Partly Cloudy",
-        current_desc="partly cloudy",
-        current_wind_speed="12",
-        current_wind_dir="NW",
-        current_visibility="10000",
-        current_sunrise="6:28 AM",
-        current_sunset="7:52 PM",
         current_feels_like="46",
         current_icon="E",
         today=d(day="Tue", temp="52/38", cond="Cloudy", icon="D"),
