@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from data.weather import WeatherReport
     from data.calendar_client import CalendarEvent
     from data.cats import CatFrame
-    from data.spotify import SpotifyData
 
 def load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
     """Load a TrueType font, falling back to the PIL default on failure."""
@@ -62,7 +61,6 @@ class AppData:
     calendar_events: list[CalendarEvent] | None = None
     cats: list[CatFrame] = field(default_factory=list)
     cat_index: int = 0
-    spotify: SpotifyData | None = None
     body_page_index: int = 0
     total_body_pages: int = 3
 
