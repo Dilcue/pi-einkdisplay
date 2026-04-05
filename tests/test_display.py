@@ -43,12 +43,10 @@ def test_clear_saves_white_png(tmp_path, monkeypatch):
 
 # --- pages/base.py tests ---
 
-from pages.base import BLACK, WHITE, RED, BODY_TOP, draw_page_dots, AppData
-from PIL import Image, ImageDraw as PILImageDraw
+from pages.base import WHITE, RED, BODY_TOP, AppData
 
 
 def test_color_constants_are_rgb_tuples():
-    assert BLACK == (0, 0, 0)
     assert WHITE == (255, 255, 255)
     assert RED == (255, 0, 0)
 
@@ -57,13 +55,7 @@ def test_body_top_is_104():
     assert BODY_TOP == 104
 
 
-def test_draw_page_dots_no_crash():
-    image = Image.new("RGB", (800, 480), WHITE)
-    draw = PILImageDraw.Draw(image)
-    draw_page_dots(draw, active_index=1, total=3)  # should not raise
-
-
-def test_appdata_page_fields():
+def test_appdata_defaults():
     data = AppData()
-    assert data.body_page_index == 0
-    assert data.total_body_pages == 3
+    assert data.weather is None
+    assert data.calendar_events is None

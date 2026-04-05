@@ -30,13 +30,6 @@ _SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
-_ALL_PAGES = ["clock", "weather", "calendar"]
-_PAGE_LABELS = {
-    "clock": "Clock",
-    "weather": "Weather",
-    "calendar": "Calendar",
-}
-
 
 # --- Helpers ---
 
@@ -299,37 +292,6 @@ def weather():
 
     return render_template("weather.html", cfg=cfg,
         has_api_key=bool(env.get("OPEN_WEATHER_MAP_API_KEY")))
-
-
-@app.route("/display", methods=["GET", "POST"])
-def display_settings():
-    cfg = _load_config()
-
-    if request.method == "POST":
-        try:
-            cfg["page_delay_seconds"] = max(2, int(request.form.get("page_delay_seconds", 7)))
-        except ValueError:
-            cfg["page_delay_seconds"] = 7
-        ordered = request.form.getlist("page_order")
-        enabled = set(request.form.getlist("pages_enabled"))
-        # Validate against known pages to prevent injection into config
-        cfg["pages"] = [p for p in ordered if p in enabled and p in _ALL_PAGES]
-        if not cfg["pages"]:
-            cfg["pages"] = ["clock"]
-        _save_config(cfg)
-        try:
-            _restart_display()
-            flash("Display settings saved. Display restarting…", "success")
-        except RuntimeError:
-            flash("Settings saved but display restart failed.", "warning")
-        return redirect(url_for("display_settings"))
-
-    ordered = cfg.get("pages", _ALL_PAGES)
-    all_in_order = ordered + [p for p in _ALL_PAGES if p not in ordered]
-    return render_template("display.html",
-        cfg=cfg, all_pages=_ALL_PAGES, page_labels=_PAGE_LABELS,
-        all_in_order=all_in_order,
-    )
 
 
 @app.route("/system")

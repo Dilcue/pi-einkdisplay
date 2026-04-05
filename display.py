@@ -78,8 +78,8 @@ def splash() -> None:
         font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
     except OSError:
         font = ImageFont.load_default()
-    image = Image.new("RGB", _SIZE, (0, 0, 0))  # black background
+    image = Image.new("RGB", _SIZE, (255, 255, 255))  # white background
     draw = ImageDraw.Draw(image)
-    draw.text((8, 8), "Loading Display...", font=font, fill=(255, 255, 255))
+    draw.text((8, 8), "Loading Display...", font=font, fill=(255, 0, 0))
     update(image)
     time.sleep(1)

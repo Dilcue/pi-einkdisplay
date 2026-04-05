@@ -71,7 +71,7 @@ def main() -> None:
             last_fp = fp
             _log.info("Display refreshed (data changed)")
 
-        buttons.wait_or_advance(settings.data_refresh_minutes * 60)
+        buttons.wait_or_advance(refresh_interval)
 
 
 if __name__ == "__main__":

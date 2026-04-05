@@ -7,13 +7,6 @@ def local_time(utc_dt: datetime) -> datetime:
     return utc_dt.astimezone(tz=None)
 
 
-def wind_deg_to_dir(wind_deg: float) -> str:
-    val = int((wind_deg / 22.5) + 0.5)
-    arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-           "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
-    return arr[val % 16]
-
-
 def resolve_weather_icon(code: str, is_day: bool) -> str:
     if code.startswith("01"):
         return "H" if is_day else "J"

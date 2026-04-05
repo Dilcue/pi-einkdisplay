@@ -84,7 +84,7 @@ def fetch() -> list[CalendarEvent]:
         result = service.events().list(
             calendarId=cal_id,
             timeMin=now,
-            maxResults=settings.calendar_max_events,
+            maxResults=settings.calendar_max_events * max(1, len(settings.calendar_ids)),
             singleEvents=True,
             orderBy="startTime",
         ).execute()
