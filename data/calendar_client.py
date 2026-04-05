@@ -58,7 +58,7 @@ def _format_event(event: dict) -> CalendarEvent:
     if all_day:
         end_display = end - timedelta(days=1)  # Google end date is exclusive
         if end_display.date() == start.date():
-            time_display = start.strftime("%b %-d")
+            time_display = start.strftime("%b %-d") + " (All Day)"
         else:
             time_display = start.strftime("%b %-d") + " – " + end_display.strftime("%b %-d")
     elif start == end:
