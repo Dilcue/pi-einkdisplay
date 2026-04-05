@@ -51,9 +51,9 @@ def draw_page_dots(draw: ImageDraw.ImageDraw, active_index: int, total: int, bot
         x = start_x + i * _DOT_SPACING
         bbox = [x, y, x + _DOT_D, y + _DOT_D]
         if i == active_index:
-            draw.ellipse(bbox, fill=BLACK)
+            draw.ellipse(bbox, fill=RED)
         else:
-            draw.ellipse(bbox, fill=WHITE, outline=BLACK, width=_DOT_BORDER)
+            draw.ellipse(bbox, fill=WHITE, outline=RED, width=_DOT_BORDER)
 
 
 @dataclass
