@@ -45,9 +45,12 @@ def test_dashboard_render_full():
 
 
 def test_dashboard_render_no_weather():
-    _, draw = _make_draw()
+    image, draw = _make_draw()
     data = AppData(weather=None, calendar_events=_stub_events())
     DashboardPage().render(draw, data)
+    # "Weather unavailable" is drawn at y=_STRIP_TOP+4=363 — scan that row
+    pixels = [image.getpixel((x, 370)) for x in range(10, 300)]
+    assert any(p != (255, 255, 255) for p in pixels)
 
 
 def test_dashboard_render_no_events():
