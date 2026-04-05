@@ -9,6 +9,5 @@
     "data_refresh_minutes": 60,
     "pages": ["clock", "weather", "calendar"],
     "cats_enabled": false,
-    "cat_cache_size": 8,
-    "spotify_enabled": false
+    "cat_cache_size": 8
 }
