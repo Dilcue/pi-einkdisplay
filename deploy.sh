@@ -13,6 +13,7 @@ rsync -avz \
   --exclude='.git' \
   --exclude='.worktrees' \
   --exclude='.superpowers' \
+  --exclude='docs/superpowers' \
   --exclude='.claude' \
   --exclude='__pycache__' \
   --exclude='*.pyc' \
