@@ -67,7 +67,7 @@ def _draw_forecast_strip(draw: ImageDraw.ImageDraw, w) -> None:
             draw.rectangle([(x, _STRIP_TOP + 2), (x + 2, DISPLAY_H)], fill=RED)
         draw.text((x + 6, _STRIP_TOP + 4),           label,    font=_F_STRIP_DAY,  fill=RED)
         draw.text((x + col_w // 2, _STRIP_TOP + 26), day.icon, font=_F_STRIP_ICON, fill=RED, anchor="mt")
-        draw_temp(draw, x + 6, _STRIP_TOP + 82, day.temp, unit, _F_STRIP_TEMP, RED, r=2, gap_num=-3, gap_unit=4, cy_off=2, stroke=1)
+        draw_temp(draw, x + 6, _STRIP_TOP + 82, day.temp, unit, _F_STRIP_TEMP, RED, r=2, gap_num=-1, gap_unit=4, cy_off=2, stroke=1)
         draw.text((x + 6, _STRIP_TOP + 104),          day.cond, font=_F_STRIP_COND, fill=RED)
 
 
