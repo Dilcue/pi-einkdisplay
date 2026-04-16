@@ -1,4 +1,4 @@
-# pages/cat.py
+# cat_mode.py
 from __future__ import annotations
 
 import logging
@@ -8,11 +8,12 @@ import time
 
 from PIL import Image, ImageFont
 
+import buttons
 import display
 from data import cat_client
 
 _log = logging.getLogger(__name__)
-_FONTS_DIR = pathlib.Path(__file__).parent.parent / "fonts"
+_FONTS_DIR = pathlib.Path(__file__).parent / "fonts"
 _TIMEOUT = 60.0
 
 
@@ -26,7 +27,6 @@ class CatMode:
 
     def enter(self, sw1: int, sw2: int) -> None:
         """Fetch a cat, display it, and loop until SW2 is pressed or timeout."""
-        import buttons
         _log.info("Entering cat mode")
         try:
             img = cat_client.fetch()

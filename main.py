@@ -10,7 +10,7 @@ from config import settings
 from data import calendar_client
 from data import weather
 from pages.base import AppData
-from pages.cat import CatMode
+from cat_mode import CatMode
 from pages.dashboard import DashboardPage
 from pages.header import render_header
 

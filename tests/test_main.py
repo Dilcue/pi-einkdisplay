@@ -26,17 +26,17 @@ def _make_cat_image():
 def test_cat_mode_displays_cat_and_returns_on_sw2(monkeypatch):
     import main
     import buttons
-    from pages.cat import CatMode
+    from cat_mode import CatMode
 
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
 
-    import pages.cat as cat_mod
+    import cat_mode as cat_mod
     monkeypatch.setattr(cat_mod, "display", MagicMock())
 
     q.put(main._SW2)
 
-    with patch("pages.cat.cat_client.fetch", return_value=_make_cat_image()):
+    with patch("cat_mode.cat_client.fetch", return_value=_make_cat_image()):
         cat = CatMode()
         cat._start_prefetch = lambda: ([], threading.Lock(), [])
         cat.enter(main._SW1, main._SW2)
@@ -47,18 +47,18 @@ def test_cat_mode_displays_cat_and_returns_on_sw2(monkeypatch):
 def test_cat_mode_shows_new_cat_on_sw1(monkeypatch):
     import main
     import buttons
-    from pages.cat import CatMode
+    from cat_mode import CatMode
 
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
 
-    import pages.cat as cat_mod
+    import cat_mode as cat_mod
     monkeypatch.setattr(cat_mod, "display", MagicMock())
 
     q.put(main._SW1)
     q.put(main._SW2)
 
-    with patch("pages.cat.cat_client.fetch", return_value=_make_cat_image()):
+    with patch("cat_mode.cat_client.fetch", return_value=_make_cat_image()):
         cat = CatMode()
         cat._start_prefetch = lambda: ([], threading.Lock(), [])
         cat.enter(main._SW1, main._SW2)
@@ -69,18 +69,18 @@ def test_cat_mode_shows_new_cat_on_sw1(monkeypatch):
 def test_cat_mode_shows_error_and_returns_on_fetch_failure(monkeypatch):
     import main
     import buttons
-    from pages.cat import CatMode
+    from cat_mode import CatMode
 
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
 
-    import pages.cat as cat_mod
+    import cat_mode as cat_mod
     mock_display = MagicMock()
     mock_display.new_image.return_value = (MagicMock(), MagicMock())
     monkeypatch.setattr(cat_mod, "display", mock_display)
     monkeypatch.setattr(cat_mod.time, "sleep", MagicMock())
 
-    with patch("pages.cat.cat_client.fetch", side_effect=RuntimeError("no cats")):
+    with patch("cat_mode.cat_client.fetch", side_effect=RuntimeError("no cats")):
         cat = CatMode()
         cat.enter(main._SW1, main._SW2)
 
@@ -90,15 +90,15 @@ def test_cat_mode_shows_error_and_returns_on_fetch_failure(monkeypatch):
 def test_cat_mode_returns_on_timeout(monkeypatch):
     import main
     import buttons
-    from pages.cat import CatMode
+    from cat_mode import CatMode
 
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
 
-    import pages.cat as cat_mod
+    import cat_mode as cat_mod
     monkeypatch.setattr(cat_mod, "display", MagicMock())
 
-    with patch("pages.cat.cat_client.fetch", return_value=_make_cat_image()):
+    with patch("cat_mode.cat_client.fetch", return_value=_make_cat_image()):
         with patch("buttons.wait_for_button", side_effect=[None]):
             cat = CatMode()
             cat.enter(main._SW1, main._SW2)
