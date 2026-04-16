@@ -21,6 +21,21 @@
   </div>
 
   <div class="card">
+    <h2>Units</h2>
+    <div class="form-group">
+      <label>Temperature</label>
+      <div style="display:flex;gap:16px;align-items:center;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
+          <input type="radio" name="use_celsius" value="0" {% if not cfg.get('use_celsius') %}checked{% endif %}> °F — Fahrenheit
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
+          <input type="radio" name="use_celsius" value="1" {% if cfg.get('use_celsius') %}checked{% endif %}> °C — Celsius
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <h2>API</h2>
     <div class="form-group">
       <label for="owm_api_key">OpenWeatherMap API key</label>

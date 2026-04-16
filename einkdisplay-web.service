@@ -6,6 +6,7 @@ After=network.target
 User=<user>
 WorkingDirectory=/home/<user>/einkdisplay
 ExecStart=/home/<user>/einkdisplay-venv/bin/python web/app.py
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 Restart=on-failure
 RestartSec=5
 

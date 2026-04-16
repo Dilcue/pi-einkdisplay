@@ -15,6 +15,8 @@ def app(tmp_path, monkeypatch):
         "calendar_ids": [],
         "calendar_max_events": 5,
         "data_refresh_minutes": 60,
+        "swap_buttons": False,
+        "use_celsius": False,
     }
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps(config))
@@ -125,6 +127,40 @@ def test_system_get_returns_200(client, monkeypatch):
     monkeypatch.setattr(webapp, "_recent_logs", lambda: "log line 1\nlog line 2")
     resp = client.get("/system")
     assert resp.status_code == 200
+
+
+def test_system_settings_post_saves_swap_buttons(client, monkeypatch, tmp_path):
+    import web.app as webapp
+    monkeypatch.setattr(webapp, "_restart_display", lambda: None)
+    resp = client.post("/system/settings", data={"swap_buttons": "1"})
+    assert resp.status_code == 302
+    cfg = json.loads((tmp_path / "config.json").read_text())
+    assert cfg["swap_buttons"] is True
+
+
+def test_system_settings_post_clears_swap_buttons(client, monkeypatch, tmp_path):
+    import web.app as webapp
+    monkeypatch.setattr(webapp, "_restart_display", lambda: None)
+    resp = client.post("/system/settings", data={"swap_buttons": "0"})
+    assert resp.status_code == 302
+    cfg = json.loads((tmp_path / "config.json").read_text())
+    assert cfg["swap_buttons"] is False
+
+
+def test_weather_post_saves_celsius(client, monkeypatch, tmp_path):
+    import web.app as webapp
+    monkeypatch.setattr(webapp, "_restart_display", lambda: None)
+    resp = client.post("/weather", data={
+        "location_name": "Test City",
+        "latitude": "40.0",
+        "longitude": "-75.0",
+        "data_refresh_minutes": "60",
+        "owm_api_key": "",
+        "use_celsius": "1",
+    })
+    assert resp.status_code == 302
+    cfg = json.loads((tmp_path / "config.json").read_text())
+    assert cfg["use_celsius"] is True
 
 
 def test_system_restart_post(client, monkeypatch):

@@ -1,19 +1,18 @@
 #!/bin/bash
 # deploy.sh — rsync project files from local machine to Pi
 #
-# Usage: PI_USER=<user> PI_HOST=einkdisplay ./deploy.sh
+# Usage: PI_HOST=einkdisplay ./deploy.sh
 #
-# Defaults assume SSH alias "einkdisplay" is configured in ~/.ssh/config.
+# Defaults assume SSH alias "einkdisplay" is configured in ~/.ssh/config
+# with the correct User set.
 
-PI_USER="${PI_USER:-pi}"
 PI_HOST="${PI_HOST:-einkdisplay}"
-PI_PATH="/home/${PI_USER}/einkdisplay"
 
 rsync -avz \
   --exclude='.git' \
   --exclude='.worktrees' \
   --exclude='.superpowers' \
-  --exclude='docs/superpowers' \
+  --exclude='docs/' \
   --exclude='.claude' \
   --exclude='__pycache__' \
   --exclude='*.pyc' \
@@ -21,7 +20,14 @@ rsync -avz \
   --exclude='token.json' \
   --exclude='credentials.json' \
   --exclude='config.json' \
-  ./ "${PI_HOST}:${PI_PATH}/"
+  ./ "${PI_HOST}:~/einkdisplay/"
+
+# Install service files with the <user> placeholder substituted to the real user
+PI_USER="$(ssh "${PI_HOST}" 'echo $USER')"
+for svc in einkdisplay.service einkdisplay-web.service; do
+  ssh "${PI_HOST}" "sed 's|<user>|${PI_USER}|g' ~/einkdisplay/${svc} | sudo tee /etc/systemd/system/${svc} > /dev/null"
+done
+ssh "${PI_HOST}" "sudo systemctl daemon-reload"
 
 echo "Deploy complete. Restart the service if needed:"
 echo "  ssh ${PI_HOST} 'sudo systemctl restart einkdisplay einkdisplay-web'"

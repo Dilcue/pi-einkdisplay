@@ -32,7 +32,8 @@ class WeatherReport:
 
 def fetch() -> WeatherReport:
     base = "https://api.openweathermap.org/data/2.5"
-    params = f"lat={settings.latitude}&lon={settings.longitude}&appid={settings.owm_api_key}&units=imperial"
+    units = "metric" if settings.use_celsius else "imperial"
+    params = f"lat={settings.latitude}&lon={settings.longitude}&appid={settings.owm_api_key}&units={units}"
 
     current_resp = requests.get(f"{base}/weather?{params}", timeout=10)
     current_resp.raise_for_status()

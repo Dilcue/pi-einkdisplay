@@ -1,6 +1,7 @@
 # display.py
 import os
 import pathlib
+import socket
 import time
 from PIL import Image, ImageDraw, ImageFont
 
@@ -72,14 +73,30 @@ def clear() -> None:
     update(image)
 
 
+def _local_ip() -> str:
+    """Return the machine's outbound LAN IP, or '?.?.?.?' on failure."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except Exception:
+        return "?.?.?.?"
+
+
 def splash() -> None:
     """Show a startup splash screen."""
     try:
-        font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
+        font = ImageFont.truetype(str(_FONTS_DIR / "notkia.ttf"), 16)
     except OSError:
         font = ImageFont.load_default()
     image = Image.new("RGB", _SIZE, (255, 255, 255))  # white background
     draw = ImageDraw.Draw(image)
     draw.text((8, 8), "Loading Display...", font=font, fill=(255, 0, 0))
+
+    ip_text = f"Web config ready at {_local_ip()} ({socket.gethostname()})"
+    bbox = draw.textbbox((0, 0), ip_text, font=font)
+    text_h = bbox[3] - bbox[1]
+    draw.text((8, _HEIGHT - 8 - text_h), ip_text, font=font, fill=(255, 0, 0))
+
     update(image)
     time.sleep(1)

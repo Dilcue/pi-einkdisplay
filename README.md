@@ -4,6 +4,16 @@ Raspberry Pi dashboard on an Adafruit 7.5" tricolor e-ink display (800×480, BWR
 
 ---
 
+## Screenshots
+
+**Dashboard**
+![Dashboard](docs/screenshots/dashboard.png)
+
+**Cat Mode** — press SW1 to fetch a full-screen cat, dithered to pure black/red/white
+![Cat Mode](docs/screenshots/cat.png)
+
+---
+
 ## Hardware
 
 - Raspberry Pi 4
@@ -86,7 +96,7 @@ sudo systemctl start einkdisplay
 
 ## Web UI (systemd)
 
-The web UI runs on port 8080 and lets you configure weather, calendar, and Google OAuth from any browser on your local network.
+The web UI runs on port 80 and lets you configure weather, calendar, and Google OAuth from any browser on your local network.
 
 **Sudoers entry** (required for the web UI to restart the display service):
 ```bash
@@ -103,7 +113,7 @@ sudo systemctl enable einkdisplay-web
 sudo systemctl start einkdisplay-web
 ```
 
-Access at `http://einkdisplay.local:8080`
+Access at `http://einkdisplay.local`
 
 ---
 

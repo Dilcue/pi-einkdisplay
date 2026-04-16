@@ -280,6 +280,7 @@ def weather():
             cfg["data_refresh_minutes"] = max(5, int(request.form.get("data_refresh_minutes", 60)))
         except ValueError:
             cfg["data_refresh_minutes"] = 60
+        cfg["use_celsius"] = request.form.get("use_celsius") == "1"
         api_key = request.form.get("owm_api_key", "").strip()
         if api_key:
             env["OPEN_WEATHER_MAP_API_KEY"] = api_key
@@ -301,7 +302,8 @@ def system():
     status = _service_status()
     uptime = _service_uptime()
     logs = _recent_logs()
-    return render_template("system.html", status=status, uptime=uptime, logs=logs)
+    cfg = _load_config()
+    return render_template("system.html", status=status, uptime=uptime, logs=logs, cfg=cfg)
 
 
 @app.route("/system/restart", methods=["POST"])
@@ -314,6 +316,18 @@ def system_restart():
     return redirect(url_for("system"))
 
 
+@app.route("/system/settings", methods=["POST"])
+def system_settings():
+    cfg = _load_config()
+    cfg["swap_buttons"] = request.form.get("swap_buttons") == "1"
+    _save_config(cfg)
+    try:
+        _restart_display()
+        flash("Hardware settings saved. Display restarting…", "success")
+    except RuntimeError:
+        flash("Settings saved but display restart failed.", "warning")
+    return redirect(url_for("system"))
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=80, debug=False)
