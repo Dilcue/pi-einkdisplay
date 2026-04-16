@@ -146,8 +146,9 @@ python3 main.py
 
 ## Local Simulation
 
-Renders a preview PNG without Pi hardware:
+Renders preview PNGs without Pi hardware:
 ```bash
-EINK_SIMULATE=1 python3 simulate.py
-open /tmp/einkdisplay/dashboard.png
+python3 simulate.py
+open docs/screenshots/dashboard.png
+open docs/screenshots/cat.png
 ```
