@@ -5,7 +5,7 @@ import time
 import gpiod
 from gpiod.line import Bias, Edge
 
-_PINS = [21, 16, 20, 19, 26]  # SW1–SW5
+_PINS = [5, 6]  # SW1, SW2
 _CHIP = "/dev/gpiochip0"
 _advance = threading.Event()
 _thread = None
