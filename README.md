@@ -1,6 +1,6 @@
 # Pi E-Ink Display
 
-Raspberry Pi dashboard on an Adafruit 7.5" tricolor e-ink display (800×480, BWR). Shows today's date, current weather, upcoming calendar events, and a 5-day forecast. Includes a Flask web UI for configuration.
+Raspberry Pi dashboard on an Adafruit 7.5" tricolor e-ink display (800×480, BWR). Shows today's date, current weather, upcoming calendar events, and a 5-day forecast. Press SW1 to fetch a full-screen cat photo, dithered to pure black, red, and white. Includes a Flask web UI for configuration.
 
 ---
 
