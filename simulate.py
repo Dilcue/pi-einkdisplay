@@ -55,7 +55,7 @@ def _stub_weather() -> WeatherReport:
         today=d(day="Tue", temp="52/38", cond="Cloudy", icon="D"),
         tomorrow=d(day="Wed", temp="58/44", cond="Rain", icon="B"),
         day3=d(day="Thu", temp="61/48", cond="Clear", icon="H"),
-        day4=d(day="Fri", temp="55/40", cond="Snow", icon="C"),
+        day4=d(day="Fri", temp="34/26", cond="Snow", icon="C"),
         day5=d(day="Sat", temp="47/35", cond="Cloudy", icon="D"),
     )
 
