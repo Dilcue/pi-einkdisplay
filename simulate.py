@@ -31,7 +31,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # The physical UC8179 ink renders red as a deep maroon rather than pure (255,0,0).
 # Remap red pixels before saving PNGs so screenshots are visually representative.
-_SIM_RED = (178, 34, 34)
+_SIM_RED = (128, 0, 0)
 
 
 def _remap_red(img: Image.Image) -> Image.Image:
