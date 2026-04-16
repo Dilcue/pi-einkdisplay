@@ -19,6 +19,7 @@ _log = logging.getLogger(__name__)
 
 _SW1 = 6 if settings.swap_buttons else 5
 _SW2 = 5 if settings.swap_buttons else 6
+_BUTTON_POLL = 30  # seconds; short enough that data never goes stale by more than this
 
 
 def _refresh_weather(app_data: AppData) -> None:
@@ -78,7 +79,7 @@ def main() -> None:
             last_fp = fp
             _log.info("Display refreshed (data changed)")
 
-        pin = buttons.wait_for_button(refresh_interval)
+        pin = buttons.wait_for_button(_BUTTON_POLL)
         if pin == _SW1:
             cat.enter(_SW1, _SW2)
             last_fp = None  # force dashboard re-render on return

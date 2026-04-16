@@ -54,7 +54,3 @@ def wait_for_button(timeout: float) -> int | None:
     except queue.Empty:
         return None
 
-
-def wait_or_advance(seconds: float) -> bool:
-    """Sleep up to `seconds`. Returns True if a button was pressed early."""
-    return wait_for_button(seconds) is not None

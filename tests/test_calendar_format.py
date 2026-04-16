@@ -1,5 +1,6 @@
 # tests/test_calendar_format.py
 """Tests for _format_event — pure formatting logic, no network calls."""
+import pytest
 from data.calendar_client import _format_event
 
 
@@ -63,3 +64,10 @@ def test_multi_day_timed_event():
     assert "Sun" in result.time_display
     assert "Mon" in result.time_display
     assert "Apr" in result.time_display
+
+
+def test_format_event_raises_on_missing_date_fields():
+    """An event with an empty start dict raises rather than silently returning garbage."""
+    event = {"summary": "Bad Event", "start": {}, "end": {}}
+    with pytest.raises((TypeError, ValueError)):
+        _format_event(event)

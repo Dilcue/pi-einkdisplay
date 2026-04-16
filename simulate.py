@@ -24,7 +24,7 @@ from pages.header import render_header
 from pages.dashboard import DashboardPage
 from data.weather import WeatherReport, DayForecast
 from data.calendar_client import CalendarEvent
-from data.cat_client import _to_bwr
+from data.cat_client import to_bwr
 
 OUT_DIR = pathlib.Path(__file__).parent / "docs" / "screenshots"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -86,7 +86,7 @@ def _stub_cat() -> Image.Image:
             resp.raise_for_status()
             img = Image.open(io.BytesIO(resp.content))
             img.load()
-            return _to_bwr(img)
+            return to_bwr(img)
         except Exception:
             continue
     raise RuntimeError("Could not fetch cat image for simulation")

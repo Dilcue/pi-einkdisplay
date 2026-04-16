@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from PIL import Image
 
-from data.cat_client import fetch, _to_bwr, _center_crop
+from data.cat_client import fetch, to_bwr, _center_crop
 
 
 def _solid_jpeg(w=400, h=300, color=(128, 128, 128)) -> bytes:
@@ -74,34 +74,34 @@ def test_center_crop_wide_source():
     assert result.size == (800, 480)
 
 
-def test_to_bwr_dark_pixels_become_black():
+def testto_bwr_dark_pixels_become_black():
     img = Image.new("RGB", (800, 480), (30, 30, 30))
-    result = _to_bwr(img)
+    result = to_bwr(img)
     assert result.getpixel((0, 0)) == (0, 0, 0)
 
 
-def test_to_bwr_light_pixels_become_white():
+def testto_bwr_light_pixels_become_white():
     img = Image.new("RGB", (800, 480), (200, 200, 200))
-    result = _to_bwr(img)
+    result = to_bwr(img)
     assert result.getpixel((0, 0)) == (255, 255, 255)
 
 
-def test_to_bwr_mid_pixels_become_red():
+def testto_bwr_mid_pixels_become_red():
     img = Image.new("RGB", (800, 480), (120, 120, 120))
-    result = _to_bwr(img)
+    result = to_bwr(img)
     assert result.getpixel((0, 0)) == (255, 0, 0)
 
 
-def test_to_bwr_only_pure_bwr_pixels():
+def testto_bwr_only_pure_bwr_pixels():
     """Every output pixel must be exactly black, red, or white — no shades."""
     img = Image.new("RGB", (800, 480), (120, 120, 120))
-    result = _to_bwr(img)
+    result = to_bwr(img)
     allowed = {(0, 0, 0), (255, 0, 0), (255, 255, 255)}
     assert set(result.getdata()).issubset(allowed)
 
 
-def test_to_bwr_output_is_rgb_800x480():
+def testto_bwr_output_is_rgb_800x480():
     img = Image.new("RGB", (800, 480), (100, 100, 100))
-    result = _to_bwr(img)
+    result = to_bwr(img)
     assert result.mode == "RGB"
     assert result.size == (800, 480)

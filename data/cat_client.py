@@ -41,10 +41,10 @@ def fetch() -> Image.Image:
     except Exception as e:
         raise RuntimeError(f"Cat fetch failed: {e}") from e
 
-    return _to_bwr(img)
+    return to_bwr(img)
 
 
-def _to_bwr(img: Image.Image) -> Image.Image:
+def to_bwr(img: Image.Image) -> Image.Image:
     """Resize to 800×480 with center-crop, then dither to pure black/red/white."""
     img = img.convert("RGB")
     img = _center_crop(img, _DISPLAY_SIZE)

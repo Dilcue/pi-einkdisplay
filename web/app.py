@@ -4,6 +4,7 @@ import base64
 import json
 import logging
 import os
+import re
 import secrets
 import subprocess
 from datetime import datetime, timezone
@@ -18,8 +19,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
-# Allow HTTP for local OAuth redirect (LAN-only deployment)
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+_CALENDAR_ID_RE = re.compile(r'^[\w.+@\-]+$')
 
 _BASE = Path(__file__).parent.parent
 _CONFIG_PATH = _BASE / "config.json"
@@ -199,7 +199,7 @@ def calendar():
     oauth_email = _oauth_connected_email()
 
     if request.method == "POST":
-        selected = [c for c in request.form.getlist("calendar_ids") if c]
+        selected = [c for c in request.form.getlist("calendar_ids") if c and _CALENDAR_ID_RE.match(c)]
         try:
             max_events = max(1, min(5, int(request.form.get("calendar_max_events", 3))))
         except ValueError:
@@ -224,6 +224,7 @@ def oauth_start():
     if not _CREDENTIALS_PATH.exists():
         flash("credentials.json not found on the server.", "danger")
         return redirect(url_for("calendar"))
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # LAN-only: allow HTTP redirect
     flow = Flow.from_client_secrets_file(
         str(_CREDENTIALS_PATH), scopes=_SCOPES,
         redirect_uri=url_for("oauth_callback", _external=True)
@@ -244,6 +245,7 @@ def oauth_callback():
         flash("Authorization failed: invalid state. Please try again.", "danger")
         return redirect(url_for("calendar"))
     try:
+        os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # LAN-only: allow HTTP redirect
         flow = Flow.from_client_secrets_file(
             str(_CREDENTIALS_PATH), scopes=_SCOPES,
             redirect_uri=url_for("oauth_callback", _external=True)

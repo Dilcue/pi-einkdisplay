@@ -87,6 +87,41 @@ def test_cat_mode_shows_error_and_returns_on_fetch_failure(monkeypatch):
     mock_display.update.assert_called_once()
 
 
+def test_refresh_weather_preserves_stale_data_on_failure():
+    import main
+    from pages.base import AppData
+    from data.weather import WeatherReport, DayForecast
+
+    stub_day = DayForecast(day="Mon", temp="50/40", cond="Clear", icon="H")
+    app_data = AppData()
+    app_data.weather = WeatherReport(
+        current_temp="52", current_cond="Clear", current_feels_like="48",
+        current_icon="H", today=stub_day, tomorrow=stub_day,
+        day3=stub_day, day4=stub_day, day5=stub_day,
+    )
+    original = app_data.weather
+
+    with patch("main.weather.fetch", side_effect=RuntimeError("network error")):
+        main._refresh_weather(app_data)
+
+    assert app_data.weather is original
+
+
+def test_refresh_calendar_preserves_stale_data_on_failure():
+    import main
+    from pages.base import AppData
+    from data.calendar_client import CalendarEvent
+
+    app_data = AppData()
+    app_data.calendar_events = [CalendarEvent(summary="Test", time_display="9:00 AM")]
+    original = app_data.calendar_events
+
+    with patch("main.calendar_client.fetch", side_effect=RuntimeError("network error")):
+        main._refresh_calendar(app_data)
+
+    assert app_data.calendar_events is original
+
+
 def test_cat_mode_returns_on_timeout(monkeypatch):
     import main
     import buttons

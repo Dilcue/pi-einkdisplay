@@ -94,4 +94,10 @@ def fetch() -> list[CalendarEvent]:
         return e["start"].get("dateTime") or e["start"].get("date") or ""
 
     events.sort(key=_start_key)
-    return [_format_event(e) for e in events[:settings.calendar_max_events]]
+    formatted = []
+    for e in events[:settings.calendar_max_events]:
+        try:
+            formatted.append(_format_event(e))
+        except Exception:
+            _log.warning("Skipping malformed calendar event: %s", e.get("summary", "(unknown)"))
+    return formatted

@@ -33,13 +33,18 @@ class WeatherReport:
 def fetch() -> WeatherReport:
     base = "https://api.openweathermap.org/data/2.5"
     units = "metric" if settings.use_celsius else "imperial"
-    params = f"lat={settings.latitude}&lon={settings.longitude}&appid={settings.owm_api_key}&units={units}"
+    params = {
+        "lat": settings.latitude,
+        "lon": settings.longitude,
+        "appid": settings.owm_api_key,
+        "units": units,
+    }
 
-    current_resp = requests.get(f"{base}/weather?{params}", timeout=10)
+    current_resp = requests.get(f"{base}/weather", params=params, timeout=10)
     current_resp.raise_for_status()
     current = current_resp.json()
 
-    forecast_resp = requests.get(f"{base}/forecast?{params}", timeout=10)
+    forecast_resp = requests.get(f"{base}/forecast", params=params, timeout=10)
     forecast_resp.raise_for_status()
     forecast = forecast_resp.json()
 
@@ -67,7 +72,7 @@ def fetch() -> WeatherReport:
         icon_code = midday["weather"][0]["icon"]
         return DayForecast(
             day=d.strftime("%a"),
-            temp=f"{'%.0f' % high}/{'%.0f' % low}",
+            temp=f"{high:.0f}/{low:.0f}",
             cond=midday["weather"][0]["main"].capitalize(),
             icon=resolve_weather_icon(icon_code, force_day),
         )
@@ -76,9 +81,9 @@ def fetch() -> WeatherReport:
     future_days = [d for d in sorted_days if d >= today_date]
 
     return WeatherReport(
-        current_temp=f"{'%.0f' % current['main']['temp']}",
+        current_temp=f"{current['main']['temp']:.0f}",
         current_cond=current["weather"][0]["main"].capitalize(),
-        current_feels_like=f"{'%.0f' % current['main']['feels_like']}",
+        current_feels_like=f"{current['main']['feels_like']:.0f}",
         current_icon=resolve_weather_icon(current_icon_code, is_day),
         today=_day(future_days[0], force_day=is_day) if len(future_days) > 0 else DayForecast("---", "--/--", "---", ""),
         tomorrow=_day(future_days[1], force_day=True) if len(future_days) > 1 else DayForecast("---", "--/--", "---", ""),

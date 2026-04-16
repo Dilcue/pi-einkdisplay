@@ -98,6 +98,8 @@ sudo systemctl start einkdisplay
 
 The web UI runs on port 80 and lets you configure weather, calendar, and Google OAuth from any browser on your local network.
 
+> **Security note:** The web UI has no authentication. It is designed for a trusted home LAN. Do not expose the Pi directly to the internet or an untrusted network.
+
 **Sudoers entry** (required for the web UI to restart the display service):
 ```bash
 sudo visudo
