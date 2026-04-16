@@ -103,7 +103,7 @@ sudo systemctl enable einkdisplay-web
 sudo systemctl start einkdisplay-web
 ```
 
-Access at `http://<pi-ip>:8080`
+Access at `http://einkdisplay.local:8080`
 
 ---
 
