@@ -4,5 +4,7 @@
     "longitude": "0.000000",
     "calendar_ids": [],
     "calendar_max_events": 5,
-    "data_refresh_minutes": 60
+    "data_refresh_minutes": 60,
+    "swap_buttons": false,
+    "use_celsius": false
 }

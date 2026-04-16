@@ -92,6 +92,14 @@ def test_to_bwr_mid_pixels_become_red():
     assert result.getpixel((0, 0)) == (255, 0, 0)
 
 
+def test_to_bwr_only_pure_bwr_pixels():
+    """Every output pixel must be exactly black, red, or white — no shades."""
+    img = Image.new("RGB", (800, 480), (120, 120, 120))
+    result = _to_bwr(img)
+    allowed = {(0, 0, 0), (255, 0, 0), (255, 255, 255)}
+    assert set(result.getdata()).issubset(allowed)
+
+
 def test_to_bwr_output_is_rgb_800x480():
     img = Image.new("RGB", (800, 480), (100, 100, 100))
     result = _to_bwr(img)

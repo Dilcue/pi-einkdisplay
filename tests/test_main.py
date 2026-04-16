@@ -32,7 +32,7 @@ def test_cat_mode_displays_cat_and_returns_on_sw2(monkeypatch):
     monkeypatch.setattr(main, "display", MagicMock())
     monkeypatch.setattr(main, "_start_prefetch", lambda: ([], threading.Lock(), []))
 
-    q.put(6)  # SW2 — return immediately after first display
+    q.put(main._SW2)  # SW2 — return immediately after first display
 
     with patch("main.cat_client.fetch", return_value=_make_cat_image()):
         main.cat_mode()
@@ -49,8 +49,8 @@ def test_cat_mode_shows_new_cat_on_sw1(monkeypatch):
     monkeypatch.setattr(main, "display", MagicMock())
     monkeypatch.setattr(main, "_start_prefetch", lambda: ([], threading.Lock(), []))
 
-    q.put(5)  # SW1 — new cat
-    q.put(6)  # SW2 — exit
+    q.put(main._SW1)  # SW1 — new cat
+    q.put(main._SW2)  # SW2 — exit
 
     with patch("main.cat_client.fetch", return_value=_make_cat_image()):
         main.cat_mode()

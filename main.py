@@ -22,8 +22,8 @@ from pages.header import render_header
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 _log = logging.getLogger(__name__)
 
-_SW1 = 5
-_SW2 = 6
+_SW1 = 6 if settings.swap_buttons else 5
+_SW2 = 5 if settings.swap_buttons else 6
 _CAT_TIMEOUT = 60.0
 _FONTS_DIR = pathlib.Path(__file__).parent / "fonts"
 
@@ -57,7 +57,7 @@ def _show_no_cats() -> None:
     """Display 'No cats available' error and hold for 3 seconds."""
     image, draw = display.new_image()
     try:
-        font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
+        font = ImageFont.truetype(str(_FONTS_DIR / "notkia.ttf"), 16)
     except OSError:
         font = ImageFont.load_default()
     draw.text((20, 20), "No cats available", font=font, fill=(255, 0, 0))

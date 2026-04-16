@@ -11,24 +11,22 @@ _API_URL = "https://api.thecatapi.com/v1/images/search"
 _DISPLAY_SIZE = (800, 480)
 _log = logging.getLogger(__name__)
 
-_WHITE_THRESHOLD = 160
-_BLACK_THRESHOLD = 70
-
-# 768-entry lookup table for PIL Image.point(lut, "RGB") on a grayscale "L" image.
-# PIL expects separate channel blocks: 256 R values, then 256 G values, then 256 B values.
-# Thresholds: < _BLACK_THRESHOLD → black, > _WHITE_THRESHOLD → white, else → red.
-_LUT: list[int] = (
-    # R channel: black=0, red=255, white=255
-    [0 if _v < _BLACK_THRESHOLD else 255 for _v in range(256)]
-    # G channel: black=0, red=0, white=255
-    + [0 if _v <= _WHITE_THRESHOLD else 255 for _v in range(256)]
-    # B channel: black=0, red=0, white=255
-    + [0 if _v <= _WHITE_THRESHOLD else 255 for _v in range(256)]
+# Palette for grayscale-space quantisation: luminance equivalents of black (0),
+# red (76 ≈ luma of pure red), and white (255). Quantising in luma space gives
+# correct perceptual distances; afterwards the indices are reassigned to the
+# actual BWR colours so every pixel is pure (0,0,0), (255,0,0), or (255,255,255).
+_QUANT_PALETTE: Image.Image = Image.new("P", (1, 1))
+_QUANT_PALETTE.putpalette(
+    [0, 0, 0,         # index 0 → black luma
+     76, 76, 76,      # index 1 → red luma
+     255, 255, 255,   # index 2 → white luma
+     ] + [0] * (256 - 3) * 3
 )
+_BWR_PALETTE_FLAT = [0, 0, 0, 255, 0, 0, 255, 255, 255] + [0] * (256 - 3) * 3
 
 
 def fetch() -> Image.Image:
-    """Fetch a random cat image and return an 800×480 BWR PIL Image.
+    """Fetch a random cat image and return an 800×480 black/red/white PIL Image.
 
     Raises RuntimeError on any network or decode failure.
     """
@@ -47,11 +45,18 @@ def fetch() -> Image.Image:
 
 
 def _to_bwr(img: Image.Image) -> Image.Image:
-    """Resize to 800×480 with center-crop, then apply BWR threshold conversion."""
+    """Resize to 800×480 with center-crop, then dither to pure black/red/white."""
     img = img.convert("RGB")
     img = _center_crop(img, _DISPLAY_SIZE)
-    grey = img.convert("L")
-    return grey.point(_LUT, "RGB")
+    # Dither in grayscale luminance space so colour distances are perceptually
+    # correct (red sits at luma 76, not equidistant in RGB from black/white).
+    grey_rgb = img.convert("L").convert("RGB")
+    dithered = grey_rgb.quantize(
+        palette=_QUANT_PALETTE, dither=Image.Dither.FLOYDSTEINBERG
+    )
+    # Replace the grayscale quantisation levels with actual BWR colours.
+    dithered.putpalette(_BWR_PALETTE_FLAT)
+    return dithered.convert("RGB")
 
 
 def _center_crop(img: Image.Image, target: tuple[int, int]) -> Image.Image:

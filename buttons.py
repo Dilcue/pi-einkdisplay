@@ -25,7 +25,7 @@ def _watch():
                     tuple(_PINS): gpiod.LineSettings(
                         edge_detection=Edge.FALLING,
                         bias=Bias.PULL_UP,
-                        debounce_period=datetime.timedelta(milliseconds=300),
+                        debounce_period=datetime.timedelta(milliseconds=50),
                     )
                 },
             )

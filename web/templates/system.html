@@ -27,6 +27,25 @@
 </div>
 
 <div class="card">
+  <h2>Hardware</h2>
+  <form method="post" action="/system/settings">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>Button orientation</label>
+      <div style="display:flex;gap:16px;align-items:center;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
+          <input type="radio" name="swap_buttons" value="0" {% if not cfg.get('swap_buttons') %}checked{% endif %}> Default (pin 5 = cat, pin 6 = back)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
+          <input type="radio" name="swap_buttons" value="1" {% if cfg.get('swap_buttons') %}checked{% endif %}> Swapped (pin 6 = cat, pin 5 = back)
+        </label>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save &amp; Restart Display</button>
+  </form>
+</div>
+
+<div class="card">
   <h2>Recent Logs</h2>
   <pre class="logs">{{ logs }}</pre>
 </div>
