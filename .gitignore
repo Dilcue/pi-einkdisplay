@@ -5,6 +5,7 @@ data/spotify_token.json
 data/spotify_credentials.json
 *.pyc
 __pycache__/
+.coverage
 .env
 .worktrees/
 .superpowers/
