@@ -14,7 +14,6 @@ os.environ["EINK_SIMULATE"] = "1"
 
 from PIL import Image, ImageDraw
 
-import display
 from pages.base import AppData, WHITE
 from pages.header import render_header
 from pages.dashboard import DashboardPage
