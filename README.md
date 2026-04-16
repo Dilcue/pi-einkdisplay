@@ -9,7 +9,7 @@ Raspberry Pi dashboard on an Adafruit 7.5" tricolor e-ink display (800×480, BWR
 - Raspberry Pi 4
 - Adafruit 7.5" tricolor e-ink display bonnet (UC8179, BWR)
 
-> **Color note:** The UC8179 OTP waveform always runs both black and red passes unconditionally, regardless of image content. All-red-on-white is the only viable rendering mode — mixed black/red or all-black displays produce washed-out output. See `docs/superpowers/specs/2026-04-03-dashboard-display-spec.md` for full hardware findings.
+> **Color note:** The UC8179 OTP waveform always runs both black and red passes unconditionally, regardless of image content. All-red-on-white is the only viable rendering mode — mixed black/red or all-black displays produce washed-out output.
 
 ---
 
@@ -23,19 +23,6 @@ Raspberry Pi dashboard on an Adafruit 7.5" tricolor e-ink display (800×480, BWR
    ```
 
 3. Reboot
-
----
-
-## SSH Access (from Mac)
-
-Add to `~/.ssh/config`:
-```
-Host einkdisplay
-  HostName <pi-ip>
-  User <username>
-  IdentityFile ~/.ssh/einkdisplay
-  IdentitiesOnly yes
-```
 
 ---
 
@@ -58,15 +45,6 @@ pip3 install --break-system-packages \
 
 ---
 
-## Deploy Project Files
-
-```bash
-rsync -avz --exclude='.git' --exclude='__pycache__' --exclude='.env' \
-  --exclude='config.json' --exclude='credentials.json' --exclude='token.json' \
-  /path/to/pi-einkdisplay/ <user>@<pi-ip>:/home/<user>/einkdisplay/
-```
-
----
 
 ## Configuration
 
@@ -87,7 +65,7 @@ cp config.example.json config.json
 }
 ```
 
-**`.env`** — secrets (never committed):
+**`.env`** — secrets:
 ```bash
 echo "OPEN_WEATHER_MAP_API_KEY=<your_key>" > /home/<user>/einkdisplay/.env
 chmod 600 /home/<user>/einkdisplay/.env
@@ -154,7 +132,7 @@ python3 main.py
 
 ---
 
-## Local Simulation (Mac)
+## Local Simulation
 
 Renders a preview PNG without Pi hardware:
 ```bash
