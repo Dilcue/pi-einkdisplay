@@ -6,6 +6,9 @@ import pathlib
 import threading
 import time
 
+from PIL import Image
+from PIL import ImageFont
+
 import buttons
 import display
 from config import settings
@@ -52,7 +55,6 @@ def _fingerprint(app_data: AppData) -> str:
 
 def _show_no_cats() -> None:
     """Display 'No cats available' error and hold for 3 seconds."""
-    from PIL import ImageFont
     image, draw = display.new_image()
     try:
         font = ImageFont.truetype(str(_FONTS_DIR / "nokiafc22.ttf"), 16)
@@ -63,27 +65,29 @@ def _show_no_cats() -> None:
     time.sleep(3)
 
 
-def _prefetch_cat(holder: list, lock: threading.Lock) -> None:
+def _prefetch_cat(holder: list, lock: threading.Lock, cancelled: list) -> None:
     """Fetch and convert next cat image; store result in holder under lock."""
     try:
         img = cat_client.fetch()
         with lock:
-            holder.clear()
-            holder.append(img)
-        _log.info("Cat pre-fetch complete")
+            if not cancelled:
+                holder.clear()
+                holder.append(img)
+                _log.info("Cat pre-fetch complete")
     except Exception as e:
         _log.warning("Cat pre-fetch failed: %s", e)
 
 
-def _start_prefetch() -> tuple[list, threading.Lock]:
-    """Start a background cat pre-fetch; return (holder, lock)."""
+def _start_prefetch() -> tuple[list, threading.Lock, list]:
+    """Start a background cat pre-fetch; return (holder, lock, cancelled_flag)."""
     holder: list = []
     lock = threading.Lock()
-    threading.Thread(target=_prefetch_cat, args=(holder, lock), daemon=True).start()
-    return holder, lock
+    cancelled: list = []
+    threading.Thread(target=_prefetch_cat, args=(holder, lock, cancelled), daemon=True).start()
+    return holder, lock, cancelled
 
 
-def _get_cat(holder: list, lock: threading.Lock):
+def _get_cat(holder: list, lock: threading.Lock) -> Image.Image:
     """Return pre-fetched image if ready, else fetch live."""
     with lock:
         if holder:
@@ -103,7 +107,7 @@ def cat_mode() -> None:
         return
 
     display.update(img)
-    holder, lock = _start_prefetch()
+    holder, lock, cancelled = _start_prefetch()
 
     while True:
         pin = buttons.wait_for_button(_CAT_TIMEOUT)
@@ -115,7 +119,8 @@ def cat_mode() -> None:
                 _show_no_cats()
                 return
             display.update(img)
-            holder, lock = _start_prefetch()
+            cancelled.append(True)  # cancel old pre-fetch thread
+            holder, lock, cancelled = _start_prefetch()
         else:
             # SW2 or timeout — exit cat mode
             _log.info("Exiting cat mode (pin=%s)", pin)

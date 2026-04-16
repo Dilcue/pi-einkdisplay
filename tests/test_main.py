@@ -1,7 +1,11 @@
 # tests/test_main.py
 import os
+import queue
 import sys
-from unittest.mock import MagicMock
+import threading
+from unittest.mock import MagicMock, patch
+
+from PIL import Image
 
 os.environ["EINK_SIMULATE"] = "1"
 
@@ -15,11 +19,6 @@ def test_main_module_imports():
     assert callable(main._fingerprint)
 
 
-import queue
-from unittest.mock import patch, MagicMock
-from PIL import Image
-
-
 def _make_cat_image():
     return Image.new("RGB", (800, 480), (255, 0, 0))
 
@@ -31,6 +30,7 @@ def test_cat_mode_displays_cat_and_returns_on_sw2(monkeypatch):
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
     monkeypatch.setattr(main, "display", MagicMock())
+    monkeypatch.setattr(main, "_start_prefetch", lambda: ([], threading.Lock(), []))
 
     q.put(6)  # SW2 — return immediately after first display
 
@@ -47,6 +47,7 @@ def test_cat_mode_shows_new_cat_on_sw1(monkeypatch):
     q = queue.Queue()
     monkeypatch.setattr(buttons, "_press_queue", q)
     monkeypatch.setattr(main, "display", MagicMock())
+    monkeypatch.setattr(main, "_start_prefetch", lambda: ([], threading.Lock(), []))
 
     q.put(5)  # SW1 — new cat
     q.put(6)  # SW2 — exit
