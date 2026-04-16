@@ -4,7 +4,7 @@ from datetime import datetime
 from PIL import ImageFont, ImageDraw
 
 from config import settings
-from pages.base import AppData, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H, load_font
+from pages.base import AppData, WHITE, RED, DISPLAY_W, HEADER_H, DIVIDER_H, load_font, draw_temp
 
 _DATE_FONT  = load_font(str(settings.fonts_dir / "notkia.ttf"), 36)
 _DAY_FONT   = load_font(str(settings.fonts_dir / "notkia.ttf"), 52)
@@ -26,13 +26,13 @@ def render_header(draw: ImageDraw.ImageDraw, data: AppData) -> None:
 
     if data.weather is not None:
         w = data.weather
-        unit = "°C" if settings.use_celsius else "°F"
+        unit = "C" if settings.use_celsius else "F"
         glyph_x = DISPLAY_W - _RIGHT_PAD - 280
         draw.text((glyph_x, HEADER_H // 2), w.current_icon, font=_GLYPH_FONT, fill=RED, anchor="lm")
 
         temp_x = glyph_x + 90
-        draw.text((temp_x, 4),  f"{w.current_temp}{unit}",               font=_TEMP_FONT, fill=RED)
-        draw.text((temp_x, 58), w.current_cond,                           font=_COND_FONT, fill=RED)
-        draw.text((temp_x, 76), f"Feels Like {w.current_feels_like}{unit}", font=_COND_FONT, fill=RED)
+        draw_temp(draw, temp_x, 4, w.current_temp, unit, _TEMP_FONT, RED, r=5, gap_num=-4, gap_unit=6, cy_off=6, stroke=2)
+        draw.text((temp_x, 58), w.current_cond,                                font=_COND_FONT, fill=RED)
+        draw.text((temp_x, 76), f"Feels Like {w.current_feels_like}{unit}",    font=_COND_FONT, fill=RED)
 
     draw.rectangle([(0, HEADER_H), (DISPLAY_W, HEADER_H + DIVIDER_H)], fill=RED)

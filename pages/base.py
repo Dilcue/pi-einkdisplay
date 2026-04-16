@@ -37,6 +37,30 @@ class AppData:
     calendar_events: list[CalendarEvent] | None = None
 
 
+def draw_temp(
+    draw: ImageDraw.ImageDraw,
+    x: int,
+    y: int,
+    temp: str,
+    unit: str,
+    font,
+    fill,
+    r: int,
+    gap_num: int,
+    gap_unit: int,
+    cy_off: int,
+    stroke: int,
+) -> None:
+    """Draw a temperature string followed by a hand-drawn degree circle and unit letter."""
+    draw.text((x, y), temp, font=font, fill=fill)
+    bb = font.getbbox(temp)
+    num_w = bb[2] - bb[0]
+    cx = x + num_w + gap_num + r
+    cy = y + cy_off
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=fill, width=stroke)
+    draw.text((cx + r + gap_unit, y), unit, font=font, fill=fill)
+
+
 class Page(ABC):
     @abstractmethod
     def render(self, draw: ImageDraw.ImageDraw, data: AppData) -> None:

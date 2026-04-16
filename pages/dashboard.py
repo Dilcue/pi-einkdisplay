@@ -6,7 +6,7 @@ from pages.base import (
     AppData, Page,
     WHITE, RED,
     BODY_TOP, DISPLAY_W, DISPLAY_H,
-    load_font,
+    load_font, draw_temp,
 )
 
 _F_EVT  = load_font(str(settings.fonts_dir / "notkia.ttf"), 18)
@@ -59,16 +59,16 @@ def _draw_forecast_strip(draw: ImageDraw.ImageDraw, w) -> None:
     col_w  = DISPLAY_W // 5
     days   = [w.today, w.tomorrow, w.day3, w.day4, w.day5]
     labels = ["Today", w.tomorrow.day, w.day3.day, w.day4.day, w.day5.day]
-    unit   = "°C" if settings.use_celsius else "°F"
+    unit   = "C" if settings.use_celsius else "F"
 
     for i, (day, label) in enumerate(zip(days, labels)):
         x = i * col_w
         if i > 0:
             draw.rectangle([(x, _STRIP_TOP + 2), (x + 2, DISPLAY_H)], fill=RED)
-        draw.text((x + 6, _STRIP_TOP + 4),           label,               font=_F_STRIP_DAY,  fill=RED)
-        draw.text((x + col_w // 2, _STRIP_TOP + 26), day.icon,            font=_F_STRIP_ICON, fill=RED, anchor="mt")
-        draw.text((x + 6, _STRIP_TOP + 82),          f"{day.temp}{unit}", font=_F_STRIP_TEMP, fill=RED)
-        draw.text((x + 6, _STRIP_TOP + 104),          day.cond,           font=_F_STRIP_COND, fill=RED)
+        draw.text((x + 6, _STRIP_TOP + 4),           label,    font=_F_STRIP_DAY,  fill=RED)
+        draw.text((x + col_w // 2, _STRIP_TOP + 26), day.icon, font=_F_STRIP_ICON, fill=RED, anchor="mt")
+        draw_temp(draw, x + 6, _STRIP_TOP + 82, day.temp, unit, _F_STRIP_TEMP, RED, r=2, gap_num=-3, gap_unit=4, cy_off=2, stroke=1)
+        draw.text((x + 6, _STRIP_TOP + 104),          day.cond, font=_F_STRIP_COND, fill=RED)
 
 
 class DashboardPage(Page):
