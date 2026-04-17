@@ -21,15 +21,13 @@ class CatMode:
     """Full-screen cat mode. SW1 cycles to the next cat; SW2 or timeout exits."""
 
     def __init__(self) -> None:
-        self._holder: list[Image.Image] = []
-        self._lock = threading.Lock()
-        self._cancelled: list[bool] = []
+        self._holder, self._lock, self._cancelled = self._start_prefetch()
 
     def enter(self, sw1: int, sw2: int) -> None:
-        """Fetch a cat, display it, and loop until SW2 is pressed or timeout."""
+        """Display a pre-fetched cat and loop until SW2 is pressed or timeout."""
         _log.info("Entering cat mode")
         try:
-            img = cat_client.fetch()
+            img = self._get_cat()
         except RuntimeError as e:
             _log.error("Cat fetch failed: %s", e)
             self._show_error()
