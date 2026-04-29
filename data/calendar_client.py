@@ -5,8 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 import dateutil.parser
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 from config import settings
@@ -21,31 +20,17 @@ class CalendarEvent:
     time_display: str
 
 
-def _load_creds() -> Credentials | None:
+def _load_creds() -> service_account.Credentials | None:
     try:
-        creds = Credentials.from_authorized_user_file(settings.token_path, _SCOPES)
+        return service_account.Credentials.from_service_account_file(
+            settings.service_account_path, scopes=_SCOPES
+        )
     except FileNotFoundError:
+        _log.error("service_account.json not found at %s", settings.service_account_path)
         return None
-
-    if creds.valid:
-        return creds
-
-    if creds.expired and creds.refresh_token:
-        try:
-            creds.refresh(Request())
-            with open(settings.token_path, "w") as f:
-                f.write(creds.to_json())
-            return creds
-        except Exception as e:
-            _log.error("Token refresh failed: %s", e)
-            return None
-
-    # Refresh token missing or invalid — browser flow required (not possible headless)
-    _log.error(
-        "Google token is invalid and cannot be refreshed headlessly. "
-        "Run auth setup manually to generate a new token.json."
-    )
-    return None
+    except Exception as e:
+        _log.error("Failed to load service account credentials: %s", e)
+        return None
 
 
 def _format_event(event: dict) -> CalendarEvent:

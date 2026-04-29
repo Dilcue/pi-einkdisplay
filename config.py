@@ -31,8 +31,7 @@ class Settings:
         self.swap_buttons: bool = bool(_cfg.get("swap_buttons", False))
         self.use_celsius: bool = bool(_cfg.get("use_celsius", False))
 
-        self.credentials_path: str = str(_BASE / "credentials.json")
-        self.token_path: str = str(_BASE / "token.json")
+        self.service_account_path: str = str(_BASE / "service_account.json")
         self.fonts_dir: Path = _BASE / "fonts"
 
 

@@ -1,5 +1,6 @@
 credentials.json
 token.json
+service_account.json
 config.json
 data/spotify_token.json
 data/spotify_credentials.json
